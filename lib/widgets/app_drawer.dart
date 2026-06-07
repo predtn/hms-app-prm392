@@ -61,6 +61,7 @@ class AppDrawer extends StatelessWidget {
         '/room-map',
         '/find-room',
         '/find-customer',
+        '/settings',
       ],
       if (role.canManageHotelConfig) '/settings',
       '/profile',

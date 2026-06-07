@@ -31,6 +31,8 @@ import 'package:hms_app/providers/user_provider.dart';
 
 bool _canManageHotelConfig(UserRole role) => role.canManageHotelConfig;
 bool _canManageHotelOperations(UserRole role) => role.canManageHotelOperations;
+bool _canOpenSettings(UserRole role) =>
+    role.canManageHotelConfig || role.canManageHotelOperations;
 
 class RoleGuard extends StatelessWidget {
   const RoleGuard({
@@ -65,7 +67,7 @@ class AccessDeniedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('KhĂ´ng cĂ³ quyá»n truy cáº­p')),
+      appBar: AppBar(title: const Text('Không có quyền truy cập')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -79,7 +81,7 @@ class AccessDeniedView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'TĂ i khoáº£n cá»§a báº¡n khĂ´ng cĂ³ quyá»n truy cáº­p mĂ n hĂ¬nh nĂ y.',
+                'Tài khoản của bạn không có quyền truy cập màn hình này.',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -90,7 +92,7 @@ class AccessDeniedView extends StatelessWidget {
                     role?.defaultRoute ?? '/login',
                   );
                 },
-                child: const Text('Quay láº¡i'),
+                child: const Text('Quay lại'),
               ),
             ],
           ),
@@ -169,7 +171,7 @@ class HMSApp extends StatelessWidget {
           child: BookingSearchView(),
         ),
         '/settings': (context) => const RoleGuard(
-          isAllowed: _canManageHotelConfig,
+          isAllowed: _canOpenSettings,
           child: SettingsView(),
         ),
         '/profile': (context) => const MyProfileView(),
