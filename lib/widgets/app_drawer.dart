@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:hms_app/models/enums/user_role.dart';
 import 'package:hms_app/providers/user_provider.dart';
 
 class AppDrawerDestination {
@@ -52,9 +53,29 @@ const List<AppDrawerDestination> drawerDestinations = [
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
+  List<AppDrawerDestination> _getDestinationsForRole(UserRole? role) {
+    if (role == null) return const [];
+
+    final routes = <String>{
+      if (role.canManageHotelOperations) ...[
+        '/room-map',
+        '/find-room',
+        '/find-customer',
+      ],
+      if (role.canManageHotelConfig) '/settings',
+      '/profile',
+    };
+
+    return drawerDestinations
+        .where((destination) => routes.contains(destination.route))
+        .toList();
+  }
+
   int _getCurrentIndex(BuildContext context) {
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '';
-    final index = drawerDestinations.indexWhere((d) => d.route == currentRoute);
+    final profile = Provider.of<UserProvider>(context, listen: false).userProfile;
+    final destinations = _getDestinationsForRole(profile?.role);
+    final index = destinations.indexWhere((d) => d.route == currentRoute);
     return index == -1 ? 0 : index;
   }
 
@@ -69,12 +90,15 @@ class AppDrawer extends StatelessWidget {
 
   void _handleDestinationSelected(BuildContext context, int index) {
     // logout tap
-    if (index == drawerDestinations.length) {
+    final profile = Provider.of<UserProvider>(context, listen: false).userProfile;
+    final destinations = _getDestinationsForRole(profile?.role);
+
+    if (index == destinations.length) {
       _handleLogout(context);
       return;
     }
 
-    final selectedRoute = drawerDestinations[index].route;
+    final selectedRoute = destinations[index].route;
     final currentRoute = ModalRoute.of(context)?.settings.name ?? '';
 
     Navigator.of(context).pop(); // close drawer
@@ -89,6 +113,7 @@ class AppDrawer extends StatelessWidget {
     final int selectedIndex = _getCurrentIndex(context);
     final userProvider = Provider.of<UserProvider>(context);
     final profile = userProvider.userProfile;
+    final destinations = _getDestinationsForRole(profile?.role);
     final fullName = profile?.fullName ?? 'User';
     final initial = fullName.isNotEmpty ? fullName[0].toUpperCase() : 'U';
     final avatarUrl = profile?.avatarUrl;
@@ -134,7 +159,7 @@ class AppDrawer extends StatelessWidget {
           ),
         ),
         const Padding(padding: EdgeInsets.fromLTRB(28, 16, 16, 10)),
-        ...drawerDestinations.map(
+        ...destinations.map(
           (dest) => NavigationDrawerDestination(
             label: Text(dest.label),
             icon: dest.icon,

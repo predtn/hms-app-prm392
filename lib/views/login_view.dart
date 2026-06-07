@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:hms_app/models/enums/user_role.dart';
 import 'package:provider/provider.dart';
 import 'package:hms_app/providers/user_provider.dart';
 
@@ -36,7 +36,8 @@ class _LoginViewState extends State<LoginView> {
 
       // 3. Since there was another async gap (await), we need one more check!
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed('/room-map');
+      final defaultRoute = userProvider.userProfile?.role.defaultRoute ?? '/profile';
+      Navigator.of(context).pushReplacementNamed(defaultRoute);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(

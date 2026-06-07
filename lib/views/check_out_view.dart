@@ -5,6 +5,7 @@ import 'package:hms_app/models/dtos/room_details.dart';
 import 'package:hms_app/models/fee.dart';
 import 'package:hms_app/models/dtos/hotel_pricing_config.dart';
 import 'package:hms_app/providers/pricing_config_provider.dart';
+import 'package:hms_app/providers/user_provider.dart';
 import 'package:hms_app/repositories/booking_repository.dart';
 import 'package:hms_app/repositories/fee_repository.dart';
 import 'package:hms_app/repositories/room_repository.dart';
@@ -12,6 +13,7 @@ import 'package:hms_app/utils/calculate_room_price.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/widgets/time_row.dart';
 import 'package:provider/provider.dart';
+import 'package:hms_app/models/enums/user_role.dart';
 
 class CheckOutView extends StatefulWidget {
   final int bookingId;
@@ -239,6 +241,9 @@ class _CheckOutViewState extends State<CheckOutView> {
   Widget build(BuildContext context) {
     // Watch the pricing config to rebuild when it changes
     final pricingConfig = context.watch<PricingConfigProvider>().config;
+    final canManageHotelConfig =
+        context.watch<UserProvider>().userProfile?.role.canManageHotelConfig ??
+        false;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Check Out')),
@@ -502,13 +507,14 @@ class _CheckOutViewState extends State<CheckOutView> {
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  TextButton.icon(
-                    icon: const Icon(Icons.money_outlined, size: 18),
-                    label: const Text('Cài đặt phụ phí'),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/penalty-fee-config');
-                    },
-                  ),
+                  if (canManageHotelConfig)
+                    TextButton.icon(
+                      icon: const Icon(Icons.money_outlined, size: 18),
+                      label: const Text('Cài đặt phụ phí'),
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/penalty-fee-config');
+                      },
+                    ),
                 ],
               ),
               const SizedBox(height: 6),

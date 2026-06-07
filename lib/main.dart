@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hms_app/providers/color_provider.dart';
 import 'package:hms_app/providers/pricing_config_provider.dart';
+import 'package:hms_app/models/enums/user_role.dart';
 import 'package:hms_app/views/bill_details_view.dart';
 import 'package:hms_app/views/booking_details_view.dart';
 import 'package:hms_app/views/check_out_view.dart';
@@ -27,6 +28,77 @@ import 'views/login_view.dart';
 import 'package:provider/provider.dart';
 import 'package:hms_app/providers/theme_provider.dart';
 import 'package:hms_app/providers/user_provider.dart';
+
+bool _canManageHotelConfig(UserRole role) => role.canManageHotelConfig;
+bool _canManageHotelOperations(UserRole role) => role.canManageHotelOperations;
+
+class RoleGuard extends StatelessWidget {
+  const RoleGuard({
+    super.key,
+    required this.child,
+    required this.isAllowed,
+  });
+
+  final Widget child;
+  final bool Function(UserRole role) isAllowed;
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = context.watch<UserProvider>().userProfile;
+    final role = profile?.role;
+
+    if (role == null) {
+      return const LoginView();
+    }
+
+    if (isAllowed(role)) {
+      return child;
+    }
+
+    return const AccessDeniedView();
+  }
+}
+
+class AccessDeniedView extends StatelessWidget {
+  const AccessDeniedView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('KhĂ´ng cĂ³ quyá»n truy cáº­p')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.lock_outline,
+                size: 56,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'TĂ i khoáº£n cá»§a báº¡n khĂ´ng cĂ³ quyá»n truy cáº­p mĂ n hĂ¬nh nĂ y.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () {
+                  final role = context.read<UserProvider>().userProfile?.role;
+                  Navigator.of(context).pushReplacementNamed(
+                    role?.defaultRoute ?? '/login',
+                  );
+                },
+                child: const Text('Quay láº¡i'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 Future<void> main() async {
   await Supabase.initialize(
@@ -84,17 +156,47 @@ class HMSApp extends StatelessWidget {
       initialRoute: '/login', // login
       routes: {
         '/login': (context) => const LoginView(),
-        '/room-map': (context) => const RoomMapView(),
-        '/find-room': (context) => const FindRoomView(),
-        '/find-customer': (context) => const BookingSearchView(),
-        '/settings': (context) => const SettingsView(),
+        '/room-map': (context) => const RoleGuard(
+          isAllowed: _canManageHotelOperations,
+          child: RoomMapView(),
+        ),
+        '/find-room': (context) => const RoleGuard(
+          isAllowed: _canManageHotelOperations,
+          child: FindRoomView(),
+        ),
+        '/find-customer': (context) => const RoleGuard(
+          isAllowed: _canManageHotelOperations,
+          child: BookingSearchView(),
+        ),
+        '/settings': (context) => const RoleGuard(
+          isAllowed: _canManageHotelConfig,
+          child: SettingsView(),
+        ),
         '/profile': (context) => const MyProfileView(),
-        '/room-type-list': (context) => const RoomTypeList(),
-        '/room-list': (context) => const RoomList(),
-        '/service-list': (context) => const ServiceList(),
-        '/create-service': (context) => const CreateServiceView(),
-        '/add-room': (context) => const AddRoom(),
-        '/penalty-fee-config': (context) => const PenaltyFeeConfig(),
+        '/room-type-list': (context) => const RoleGuard(
+          isAllowed: _canManageHotelConfig,
+          child: RoomTypeList(),
+        ),
+        '/room-list': (context) => const RoleGuard(
+          isAllowed: _canManageHotelConfig,
+          child: RoomList(),
+        ),
+        '/service-list': (context) => const RoleGuard(
+          isAllowed: _canManageHotelConfig,
+          child: ServiceList(),
+        ),
+        '/create-service': (context) => const RoleGuard(
+          isAllowed: _canManageHotelConfig,
+          child: CreateServiceView(),
+        ),
+        '/add-room': (context) => const RoleGuard(
+          isAllowed: _canManageHotelConfig,
+          child: AddRoom(),
+        ),
+        '/penalty-fee-config': (context) => const RoleGuard(
+          isAllowed: _canManageHotelConfig,
+          child: PenaltyFeeConfig(),
+        ),
       },
       onGenerateRoute: (settings) {
         final uri = Uri.parse(settings.name!);
@@ -105,7 +207,10 @@ class HMSApp extends StatelessWidget {
           final roomId = int.tryParse(uri.pathSegments[1]);
           if (roomId != null) {
             return MaterialPageRoute(
-              builder: (context) => RoomDetailScreen(roomId: roomId),
+              builder: (context) => RoleGuard(
+                isAllowed: _canManageHotelOperations,
+                child: RoomDetailScreen(roomId: roomId),
+              ),
             );
           }
         }
@@ -115,7 +220,10 @@ class HMSApp extends StatelessWidget {
             uri.pathSegments.first == 'customer-bookings') {
           final customer = settings.arguments as CustomerShortDetail;
           return MaterialPageRoute(
-            builder: (context) => CustomerBookingsView(customer: customer),
+            builder: (context) => RoleGuard(
+              isAllowed: _canManageHotelOperations,
+              child: CustomerBookingsView(customer: customer),
+            ),
           );
         }
 
@@ -125,7 +233,10 @@ class HMSApp extends StatelessWidget {
           final roomId = int.tryParse(uri.pathSegments[1]);
           if (roomId != null) {
             return MaterialPageRoute(
-              builder: (context) => AddRoom(roomId: roomId),
+              builder: (context) => RoleGuard(
+                isAllowed: _canManageHotelConfig,
+                child: AddRoom(roomId: roomId),
+              ),
             );
           }
         }
@@ -136,7 +247,10 @@ class HMSApp extends StatelessWidget {
           final roomId = int.tryParse(uri.pathSegments[1]);
           if (roomId != null) {
             return MaterialPageRoute(
-              builder: (context) => CreateBookingScreen(roomId: roomId),
+              builder: (context) => RoleGuard(
+                isAllowed: _canManageHotelOperations,
+                child: CreateBookingScreen(roomId: roomId),
+              ),
             );
           }
         }
@@ -147,7 +261,10 @@ class HMSApp extends StatelessWidget {
           final bookingId = int.tryParse(uri.pathSegments[1]);
           if (bookingId != null) {
             return MaterialPageRoute(
-              builder: (context) => StayManagement(bookingId: bookingId),
+              builder: (context) => RoleGuard(
+                isAllowed: _canManageHotelOperations,
+                child: StayManagement(bookingId: bookingId),
+              ),
             );
           }
         }
@@ -158,7 +275,10 @@ class HMSApp extends StatelessWidget {
           final bookingId = int.tryParse(uri.pathSegments[1]);
           if (bookingId != null) {
             return MaterialPageRoute(
-              builder: (context) => BookingDetailsScreen(bookingId: bookingId),
+              builder: (context) => RoleGuard(
+                isAllowed: _canManageHotelOperations,
+                child: BookingDetailsScreen(bookingId: bookingId),
+              ),
             );
           }
         }
@@ -169,7 +289,10 @@ class HMSApp extends StatelessWidget {
           final bookingId = int.tryParse(uri.pathSegments[1]);
           if (bookingId != null) {
             return MaterialPageRoute(
-              builder: (context) => CheckOutView(bookingId: bookingId),
+              builder: (context) => RoleGuard(
+                isAllowed: _canManageHotelOperations,
+                child: CheckOutView(bookingId: bookingId),
+              ),
             );
           }
         }
@@ -180,7 +303,10 @@ class HMSApp extends StatelessWidget {
           final bookingId = int.tryParse(uri.pathSegments[1]);
           if (bookingId != null) {
             return MaterialPageRoute(
-              builder: (context) => BillDetailsView(bookingId: bookingId),
+              builder: (context) => RoleGuard(
+                isAllowed: _canManageHotelOperations,
+                child: BillDetailsView(bookingId: bookingId),
+              ),
             );
           }
         }
@@ -191,7 +317,10 @@ class HMSApp extends StatelessWidget {
           final totalAmount = int.tryParse(uri.pathSegments[1]);
           if (totalAmount != null) {
             return MaterialPageRoute<bool>(
-              builder: (context) => PaymentView(totalAmount: totalAmount),
+              builder: (context) => RoleGuard(
+                isAllowed: _canManageHotelOperations,
+                child: PaymentView(totalAmount: totalAmount),
+              ),
             );
           }
         }
