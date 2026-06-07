@@ -13,7 +13,7 @@ class RoomRepository {
     final response = await _supabase.from('rooms').select('''
       id,
       room_name,
-      room_types(type_name),
+      room_types(type_name, image_url),
       bookings!left(
         status,
         actual_check_in_date_time,

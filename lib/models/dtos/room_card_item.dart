@@ -4,12 +4,14 @@ class RoomCardItem {
   final int id;
   final String roomName;
   final String roomTypeName;
+  final String? imageUrl;
   final RoomStatus status;
 
   RoomCardItem({
     required this.id,
     required this.roomName,
     required this.roomTypeName,
+    this.imageUrl,
     required this.status,
   });
 
@@ -18,6 +20,7 @@ class RoomCardItem {
     final roomName = roomData['room_name'] as String;
     final roomType = roomData['room_types'] as Map?;
     final typeName = roomType?['type_name'] as String? ?? '';
+    final imageUrl = roomType?['image_url'] as String?;
 
     final bookings = roomData['bookings'] as List? ?? [];
 
@@ -30,6 +33,7 @@ class RoomCardItem {
       id: roomId,
       roomName: roomName,
       roomTypeName: typeName,
+      imageUrl: imageUrl,
       status: isUsing ? RoomStatus.using : RoomStatus.available,
     );
   }

@@ -113,14 +113,19 @@ class _RoomMapViewState extends State<RoomMapView> {
                         : GridView.builder(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
-                              vertical: 8,
+                              vertical: 12,
                             ),
                             gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 1.1,
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount:
+                                      MediaQuery.sizeOf(context).width >= 900
+                                      ? 4
+                                      : MediaQuery.sizeOf(context).width >= 600
+                                      ? 3
+                                      : 2,
+                                  crossAxisSpacing: 14,
+                                  mainAxisSpacing: 14,
+                                  childAspectRatio: 0.78,
                                 ),
                             itemCount: _filteredRooms.length,
                             itemBuilder: (context, index) =>
