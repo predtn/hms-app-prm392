@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/room_card_item.dart';
 import 'package:hms_app/repositories/room_repository.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
 import 'package:hms_app/widgets/room_card.dart';
 
@@ -60,9 +61,7 @@ class _RoomMapViewState extends State<RoomMapView> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi tải danh sách phòng: $e')));
+        await showErrorDialog(context, 'Lỗi tải danh sách phòng: $e');
       }
     }
   }

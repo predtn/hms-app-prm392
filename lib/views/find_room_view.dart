@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/room_search_result.dart';
 import 'package:hms_app/models/dtos/room_type_option.dart';
 import 'package:hms_app/repositories/room_type_repository.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
 import 'package:hms_app/repositories/room_repository.dart';
 import 'package:hms_app/views/booking_many_view.dart';
@@ -128,9 +129,7 @@ class _FindRoomViewState extends State<FindRoomView> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error finding rooms: $e')));
+        await showErrorDialog(context, 'Lỗi tìm phòng: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

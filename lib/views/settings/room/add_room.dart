@@ -3,6 +3,7 @@ import 'package:hms_app/models/room.dart';
 import 'package:hms_app/repositories/room_repository.dart';
 import 'package:hms_app/repositories/room_type_repository.dart';
 import 'package:hms_app/models/dtos/room_type_option.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 
 class AddRoom extends StatefulWidget {
   final int? roomId;
@@ -65,9 +66,7 @@ class _AddRoomState extends State<AddRoom> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingTypes = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi tải dữ liệu: $e')));
+        await showErrorDialog(context, 'Lỗi tải dữ liệu: $e');
       }
     }
   }
@@ -115,9 +114,7 @@ class _AddRoomState extends State<AddRoom> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi khi thêm phòng: $e')));
+        await showErrorDialog(context, 'Lỗi khi thêm phòng: $e');
       }
     }
   }

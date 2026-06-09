@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hms_app/models/service.dart';
 import 'package:hms_app/repositories/service_repository.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/views/settings/service/create_service_view.dart';
 
@@ -33,9 +34,7 @@ class _ServiceListState extends State<ServiceList> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi tải dữ liệu: $e')));
+        await showErrorDialog(context, 'Lỗi tải dữ liệu: $e');
       }
     }
   }
@@ -72,9 +71,7 @@ class _ServiceListState extends State<ServiceList> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi khi xóa: $e')));
+        await showErrorDialog(context, 'Lỗi khi xóa: $e');
       }
     }
   }

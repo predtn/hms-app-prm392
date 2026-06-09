@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/enums/booking_status.dart';
 import 'package:hms_app/repositories/booking_repository.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/widgets/date_time_picker.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
@@ -64,9 +65,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi check-in: $e')));
+        await showErrorDialog(context, 'Lỗi check-in: $e');
       }
     } finally {
       if (mounted) {
@@ -96,9 +95,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi cập nhật: $e')));
+        await showErrorDialog(context, 'Lỗi cập nhật: $e');
       }
     } finally {
       if (mounted) {
@@ -142,9 +139,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi xóa: $e')));
+        await showErrorDialog(context, 'Lỗi xóa: $e');
       }
     } finally {
       if (mounted) {

@@ -9,6 +9,7 @@ import 'package:hms_app/providers/user_provider.dart';
 import 'package:hms_app/repositories/booking_repository.dart';
 import 'package:hms_app/repositories/fee_repository.dart';
 import 'package:hms_app/repositories/room_repository.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/calculate_room_price.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/widgets/time_row.dart';
@@ -138,9 +139,7 @@ class _CheckOutViewState extends State<CheckOutView> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi khi thanh toán: $e')));
+        await showErrorDialog(context, 'Lỗi khi thanh toán: $e');
       }
     } finally {
       if (mounted) setState(() => _isCheckingOut = false);

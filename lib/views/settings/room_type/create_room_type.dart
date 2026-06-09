@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/file_upload.dart';
 import 'package:hms_app/repositories/room_type_repository.dart';
 import 'package:hms_app/models/room_type.dart';
@@ -133,9 +134,7 @@ class _CreateRoomTypeViewState extends State<CreateRoomTypeView> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+        await showErrorDialog(context, 'Lỗi: $e');
       }
     } finally {
       if (mounted) {

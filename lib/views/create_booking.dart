@@ -4,6 +4,7 @@ import 'package:hms_app/models/dtos/room_details.dart';
 import 'package:hms_app/repositories/booking_repository.dart';
 import 'package:hms_app/repositories/room_repository.dart';
 import 'package:hms_app/repositories/user_repository.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/date_diff.dart';
 import 'package:hms_app/widgets/date_time_picker.dart';
 import 'package:hms_app/widgets/room_detail_card.dart';
@@ -137,9 +138,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi tạo booking: $e')));
+        await showErrorDialog(context, 'Lỗi tạo booking: $e');
       }
     } finally {
       if (mounted) {

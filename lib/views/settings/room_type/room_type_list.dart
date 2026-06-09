@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hms_app/models/room_type.dart';
 import 'package:hms_app/repositories/room_type_repository.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/views/settings/room_type/create_room_type.dart';
 
@@ -44,9 +45,7 @@ class _RoomTypeListState extends State<RoomTypeList> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi tải dữ liệu: $e')));
+        await showErrorDialog(context, 'Lỗi tải dữ liệu: $e');
       }
     }
   }
@@ -93,9 +92,7 @@ class _RoomTypeListState extends State<RoomTypeList> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi khi xóa: $e')));
+        await showErrorDialog(context, 'Lỗi khi xóa: $e');
       }
     }
   }

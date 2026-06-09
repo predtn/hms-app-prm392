@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hms_app/models/enums/user_role.dart';
 import 'package:provider/provider.dart';
@@ -40,9 +41,7 @@ class _LoginViewState extends State<LoginView> {
       Navigator.of(context).pushReplacementNamed(defaultRoute);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+        await showErrorDialog(context, 'Đăng nhập thất bại: $e');
       }
     } finally {
       if (mounted) {

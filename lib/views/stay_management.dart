@@ -3,6 +3,7 @@ import 'package:hms_app/models/dtos/booking_details.dart';
 import 'package:hms_app/models/dtos/service_usage.dart';
 import 'package:hms_app/repositories/booking_repository.dart';
 import 'package:hms_app/repositories/service_repository.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/widgets/date_time_picker.dart';
 import 'package:hms_app/widgets/service_card.dart';
@@ -82,9 +83,7 @@ class _StayManagementState extends State<StayManagement> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+        await showErrorDialog(context, 'Lỗi: $e');
       }
     } finally {
       if (mounted) {

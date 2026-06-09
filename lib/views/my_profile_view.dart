@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:hms_app/models/user_profile.dart';
 import 'package:hms_app/repositories/user_repository.dart';
+import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/file_upload.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
 import 'package:hms_app/providers/user_provider.dart';
@@ -140,9 +141,7 @@ class _MyProfileViewState extends State<MyProfileView> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi cập nhật thông tin: $e')));
+        await showErrorDialog(context, 'Lỗi cập nhật thông tin: $e');
       }
     } finally {
       if (mounted) {
