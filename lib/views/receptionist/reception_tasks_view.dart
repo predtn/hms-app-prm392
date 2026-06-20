@@ -73,6 +73,7 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
   List<_TaskGroup> _buildTaskGroups(ReceptionTaskData data) {
     final upcomingCheckins = _upcomingCheckins(data.checkins);
     final overdueCheckins = _overdueCheckins(data.checkins);
+    final noShows = _noShows(data.checkins);
     final upcomingCheckouts = _upcomingCheckouts(data.checkouts);
     final overdueCheckouts = _overdueCheckouts(data.checkouts);
 
@@ -87,10 +88,18 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
       _TaskGroup(
         type: ReceptionTaskType.overdueCheckin,
         title: 'Quá giờ check-in',
-        subtitle: 'Không tính phạt, nhưng nên liên hệ khách hoặc xử lý no-show',
+        subtitle: 'Khách quá giờ check-in nhưng chưa đến mốc no-show',
         icon: Icons.phone_missed_outlined,
         bookings: overdueCheckins,
         urgent: overdueCheckins.isNotEmpty,
+      ),
+      _TaskGroup(
+        type: ReceptionTaskType.noShow,
+        title: 'No-show',
+        subtitle: 'Khách chưa check-in sau 18:00 ngày nhận phòng',
+        icon: Icons.event_busy_outlined,
+        bookings: noShows,
+        urgent: noShows.isNotEmpty,
       ),
       _TaskGroup(
         type: ReceptionTaskType.upcomingCheckout,
@@ -112,9 +121,10 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
 
   List<BookingScheduleItem> _overdueCheckins(List<BookingScheduleItem> items) {
     final now = DateTime.now();
-    return items
-        .where((item) => item.checkInDateTime.toLocal().isBefore(now))
-        .toList();
+    return items.where((item) {
+      final checkin = item.checkInDateTime.toLocal();
+      return checkin.isBefore(now) && !_isNoShow(item, now);
+    }).toList();
   }
 
   List<BookingScheduleItem> _upcomingCheckins(List<BookingScheduleItem> items) {
@@ -124,6 +134,23 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
       final checkin = item.checkInDateTime.toLocal();
       return !checkin.isBefore(now) && !checkin.isAfter(limit);
     }).toList();
+  }
+
+  List<BookingScheduleItem> _noShows(List<BookingScheduleItem> items) {
+    final now = DateTime.now();
+    return items.where((item) => _isNoShow(item, now)).toList();
+  }
+
+  bool _isNoShow(BookingScheduleItem item, DateTime now) {
+    final checkin = item.checkInDateTime.toLocal();
+    final noShowCutoff = DateTime(
+      checkin.year,
+      checkin.month,
+      checkin.day,
+      18,
+    );
+
+    return now.isAfter(noShowCutoff) || now.isAtSameMomentAs(noShowCutoff);
   }
 
   List<BookingScheduleItem> _overdueCheckouts(List<BookingScheduleItem> items) {

@@ -170,7 +170,8 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                                 context,
                                 '/stay-management/${currentGuest.id}',
                               );
-                              if (result == true && mounted) {
+                              if (!context.mounted) return;
+                              if (result == true) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Thao tác thành công!'),
@@ -236,7 +237,8 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                                   context,
                                   '/booking-details/${s.id}',
                                 );
-                                if (result == true && mounted) {
+                                if (!context.mounted) return;
+                                if (result == true) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text('Thao tác thành công!'),
@@ -267,7 +269,8 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                   context,
                   '/create-booking/${widget.roomId}',
                 );
-                if (result == true && mounted) {
+                if (!context.mounted) return;
+                if (result == true) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Đặt phòng thành công!')),
                   );

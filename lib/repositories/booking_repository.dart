@@ -268,6 +268,13 @@ class BookingRepository {
         .eq('id', bookingId);
   }
 
+  Future<void> markNoShow(int bookingId) async {
+    await _supabase
+        .from('bookings')
+        .update({'status': BookingStatus.noShow.toDatabaseValue()})
+        .eq('id', bookingId);
+  }
+
   /// --------------------------------------------------------------------
   /// Helper functions check room is ok to book in this time
 

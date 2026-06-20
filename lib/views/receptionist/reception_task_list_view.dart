@@ -44,7 +44,8 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
 
   bool get _isCheckinTask {
     return widget.type == ReceptionTaskType.upcomingCheckin ||
-        widget.type == ReceptionTaskType.overdueCheckin;
+        widget.type == ReceptionTaskType.overdueCheckin ||
+        widget.type == ReceptionTaskType.noShow;
   }
 
   List<BookingScheduleItem> get _filteredBookings {
@@ -97,13 +98,28 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
           final limit = now.add(_soonThreshold);
           return !checkin.isBefore(now) && !checkin.isAfter(limit);
         case ReceptionTaskType.overdueCheckin:
-          return booking.checkInDateTime.toLocal().isBefore(now);
+          final checkin = booking.checkInDateTime.toLocal();
+          return checkin.isBefore(now) && !_isNoShow(booking, now);
+        case ReceptionTaskType.noShow:
+          return _isNoShow(booking, now);
         case ReceptionTaskType.upcomingCheckout:
           return !booking.checkoutDateTime.toLocal().isBefore(now);
         case ReceptionTaskType.overdueCheckout:
           return booking.checkoutDateTime.toLocal().isBefore(now);
       }
     }).toList();
+  }
+
+  bool _isNoShow(BookingScheduleItem booking, DateTime now) {
+    final checkin = booking.checkInDateTime.toLocal();
+    final noShowCutoff = DateTime(
+      checkin.year,
+      checkin.month,
+      checkin.day,
+      18,
+    );
+
+    return now.isAfter(noShowCutoff) || now.isAtSameMomentAs(noShowCutoff);
   }
 
   String _digitsOnly(String value) {
@@ -132,6 +148,11 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
 
     if (diff.inMinutes <= 0) return 'Đến giờ $actionLabel';
     return 'Còn ${diff.inMinutes} phút';
+  }
+
+  String _noShowStatus(DateTime checkin) {
+    final local = checkin.toLocal();
+    return 'No-show sau 18:00 ${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
   }
 
   Color _statusColor(BuildContext context, DateTime target) {
@@ -176,6 +197,46 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
       await _handleTaskUpdated(booking.id);
     } else if (mounted) {
       await _reloadBookings();
+    }
+  }
+
+  Future<void> _confirmNoShow(BookingScheduleItem booking) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Xác nhận no-show'),
+        content: Text(
+          'Xác nhận khách ${booking.customerName} không đến và chuyển booking này sang trạng thái no-show?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Xác nhận'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await _bookingRepository.markNoShow(booking.id);
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đã chuyển booking sang no-show')),
+      );
+      await _handleTaskUpdated(booking.id);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xác nhận no-show: $e')),
+      );
     }
   }
 
@@ -235,24 +296,43 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
               final timeText = _isCheckinTask
                   ? 'Check-in dự kiến: ${_formatDateTime(targetTime)}'
                   : 'Checkout dự kiến: ${_formatDateTime(targetTime)}';
+              final isNoShowTask = widget.type == ReceptionTaskType.noShow;
 
               return ReceptionTaskCard(
                 booking: booking,
                 timeText: timeText,
-                statusText: _timeStatus(targetTime, actionLabel),
-                statusColor: _statusColor(context, targetTime),
-                primaryLabel: _isCheckinTask ? 'Check-in' : 'Checkout',
-                primaryIcon: _isCheckinTask
+                statusText: isNoShowTask
+                    ? _noShowStatus(targetTime)
+                    : _timeStatus(targetTime, actionLabel),
+                statusColor: isNoShowTask
+                    ? Theme.of(context).colorScheme.error
+                    : _statusColor(context, targetTime),
+                primaryLabel: isNoShowTask
+                    ? 'Chi tiết'
+                    : _isCheckinTask
+                    ? 'Check-in'
+                    : 'Checkout',
+                primaryIcon: isNoShowTask
+                    ? Icons.info_outline
+                    : _isCheckinTask
                     ? Icons.login_outlined
                     : Icons.payments_outlined,
                 onPrimary: _isCheckinTask
                     ? () => _openBookingDetails(booking)
                     : () => _openCheckout(booking),
-                secondaryLabel: _isCheckinTask ? 'Chi tiết' : 'Gia hạn',
-                secondaryIcon: _isCheckinTask
+                secondaryLabel: isNoShowTask
+                    ? 'No-show'
+                    : _isCheckinTask
+                    ? 'Chi tiết'
+                    : 'Gia hạn',
+                secondaryIcon: isNoShowTask
+                    ? Icons.event_busy_outlined
+                    : _isCheckinTask
                     ? Icons.info_outline
                     : Icons.edit_calendar_outlined,
-                onSecondary: _isCheckinTask
+                onSecondary: isNoShowTask
+                    ? () => _confirmNoShow(booking)
+                    : _isCheckinTask
                     ? () => _openBookingDetails(booking)
                     : () => _openStayManagement(booking),
               );

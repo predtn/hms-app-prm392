@@ -164,7 +164,7 @@ class _StayManagementState extends State<StayManagement> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  details.customerPhone!,
+                                  details.customerPhone,
                                   style: textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
