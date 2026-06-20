@@ -25,6 +25,12 @@ const List<AppDrawerDestination> drawerDestinations = [
     '/room-map',
   ),
   AppDrawerDestination(
+    'Việc cần xử lý',
+    Icon(Icons.notifications_active_outlined),
+    Icon(Icons.notifications_active),
+    '/upcoming-checkouts',
+  ),
+  AppDrawerDestination(
     'Tìm phòng phù hợp',
     Icon(Icons.search),
     Icon(Icons.search),
@@ -59,6 +65,7 @@ class AppDrawer extends StatelessWidget {
     final routes = <String>{
       if (role.canManageHotelOperations) ...[
         '/room-map',
+        '/upcoming-checkouts',
         '/find-room',
         '/find-customer',
         '/settings',

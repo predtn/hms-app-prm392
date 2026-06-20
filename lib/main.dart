@@ -21,6 +21,7 @@ import 'package:hms_app/views/settings/service/create_service_view.dart';
 import 'package:hms_app/views/settings/service/service_list.dart';
 import 'package:hms_app/views/settings_view.dart';
 import 'package:hms_app/views/stay_management.dart';
+import 'package:hms_app/views/reception/reception_tasks_view.dart';
 import 'package:hms_app/models/dtos/customer_short_detail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'views/room_map_view.dart';
@@ -161,6 +162,10 @@ class HMSApp extends StatelessWidget {
         '/room-map': (context) => const RoleGuard(
           isAllowed: _canManageHotelOperations,
           child: RoomMapView(),
+        ),
+        '/upcoming-checkouts': (context) => const RoleGuard(
+          isAllowed: _canManageHotelOperations,
+          child: ReceptionTasksView(),
         ),
         '/find-room': (context) => const RoleGuard(
           isAllowed: _canManageHotelOperations,

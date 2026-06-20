@@ -54,8 +54,8 @@ class BookingRepository {
           : null,
       'check_out_date_time': checkOutDateTime.toUtc().toIso8601String(),
       'status': checkInNow
-          ? BookingStatus.checkedIn.name
-          : BookingStatus.confirmed.name,
+          ? BookingStatus.checkedIn.toDatabaseValue()
+          : BookingStatus.confirmed.toDatabaseValue(),
     });
   }
 
@@ -93,6 +93,64 @@ class BookingRepository {
           status
         ''')
         .order('check_in_date_time', ascending: false);
+
+    return (response as List)
+        .map((json) => BookingScheduleItem.fromJson(json))
+        .toList();
+  }
+
+  Future<List<BookingScheduleItem>> getUpcomingCheckouts({
+    Duration threshold = const Duration(minutes: 30),
+  }) async {
+    final now = DateTime.now().toUtc();
+    final reminderLimit = now.add(threshold);
+
+    final response = await _supabase
+        .from('bookings')
+        .select('''
+          id,
+          room_id,
+          rooms(room_name),
+          user_profiles(full_name, avatar_url, phone),
+          check_in_date_time,
+          check_out_date_time,
+          actual_check_out_date_time,
+          actual_check_in_date_time,
+          status
+        ''')
+        .eq('status', BookingStatus.checkedIn.toDatabaseValue())
+        .isFilter('actual_check_out_date_time', null)
+        .lte('check_out_date_time', reminderLimit.toIso8601String())
+        .order('check_out_date_time', ascending: true);
+
+    return (response as List)
+        .map((json) => BookingScheduleItem.fromJson(json))
+        .toList();
+  }
+
+  Future<List<BookingScheduleItem>> getTodayCheckins() async {
+    final now = DateTime.now();
+    final startOfToday = DateTime(now.year, now.month, now.day).toUtc();
+    final endOfToday = DateTime(now.year, now.month, now.day + 1).toUtc();
+
+    final response = await _supabase
+        .from('bookings')
+        .select('''
+          id,
+          room_id,
+          rooms(room_name),
+          user_profiles(full_name, avatar_url, phone),
+          check_in_date_time,
+          check_out_date_time,
+          actual_check_out_date_time,
+          actual_check_in_date_time,
+          status
+        ''')
+        .eq('status', BookingStatus.confirmed.toDatabaseValue())
+        .isFilter('actual_check_in_date_time', null)
+        .gte('check_in_date_time', startOfToday.toIso8601String())
+        .lt('check_in_date_time', endOfToday.toIso8601String())
+        .order('check_in_date_time', ascending: true);
 
     return (response as List)
         .map((json) => BookingScheduleItem.fromJson(json))
@@ -170,7 +228,7 @@ class BookingRepository {
     await _supabase
         .from('bookings')
         .update({
-          'status': BookingStatus.checkedIn.name,
+          'status': BookingStatus.checkedIn.toDatabaseValue(),
           'actual_check_in_date_time': DateTime.now().toUtc().toIso8601String(),
         })
         .eq('id', bookingId);
@@ -202,7 +260,7 @@ class BookingRepository {
     await _supabase
         .from('bookings')
         .update({
-          'status': BookingStatus.checkedOut.name,
+          'status': BookingStatus.checkedOut.toDatabaseValue(),
           'actual_check_out_date_time': DateTime.now()
               .toUtc()
               .toIso8601String(),
