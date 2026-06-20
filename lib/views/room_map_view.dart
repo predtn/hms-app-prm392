@@ -8,6 +8,7 @@ import 'package:hms_app/widgets/room_card.dart';
 enum RoomFilter {
   all('Tất cả'),
   empty('Trống'),
+  reserved('Đã đặt'),
   occupied('Đang SD');
 
   final String label;
@@ -35,21 +36,20 @@ class _RoomMapViewState extends State<RoomMapView> {
   }
 
   List<RoomCardItem> get _filteredRooms {
-    return _rooms.where((room) {
-      return switch (_selectedFilter) {
-        RoomFilter.all => true,
-        RoomFilter.empty => room.status == RoomStatus.available,
-        RoomFilter.occupied => room.status == RoomStatus.using,
-      };
-    }).toList();
+    return _rooms;
   }
 
   Future<void> _loadRooms() async {
     setState(() {
-      _isLoading = true; // 👈 add this
+      _isLoading = true;
     });
     try {
-      final rooms = await _roomRepository.getRoomMap();
+      final rooms = switch (_selectedFilter) {
+        RoomFilter.all => await _roomRepository.getRoomMap(),
+        RoomFilter.empty => await _roomRepository.getAvailableRoomMap(),
+        RoomFilter.reserved => await _roomRepository.getReservedRoomMap(),
+        RoomFilter.occupied => await _roomRepository.getUsingRoomMap(),
+      };
       if (mounted) {
         setState(() {
           _rooms = rooms;
@@ -89,7 +89,10 @@ class _RoomMapViewState extends State<RoomMapView> {
                 return FilterChip(
                   label: Text(filter.label),
                   selected: isSelected,
-                  onSelected: (_) => setState(() => _selectedFilter = filter),
+                  onSelected: (_) {
+                    setState(() => _selectedFilter = filter);
+                    _loadRooms();
+                  },
                 );
               }).toList(),
             ),

@@ -12,8 +12,17 @@ class RoomCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isOccupied = room.status == RoomStatus.using;
-    final statusColor = isOccupied ? Colors.redAccent : Colors.green;
-    final statusText = isOccupied ? 'Đang SD' : 'Trống';
+    final isReserved = room.status == RoomStatus.reserved;
+    final statusColor = isOccupied
+        ? Colors.redAccent
+        : isReserved
+        ? Colors.orange
+        : Colors.green;
+    final statusText = isOccupied
+        ? 'Đang SD'
+        : isReserved
+        ? 'Đã đặt'
+        : 'Trống';
     final hasImage = room.imageUrl != null && room.imageUrl!.isNotEmpty;
 
     return Card(
@@ -132,6 +141,8 @@ class RoomCard extends StatelessWidget {
                           child: Text(
                             isOccupied
                                 ? 'Đang có khách lưu trú'
+                                : isReserved
+                                ? 'Đã có booking sắp tới'
                                 : 'Sẵn sàng nhận khách',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

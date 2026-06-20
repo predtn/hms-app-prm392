@@ -17,6 +17,8 @@ class RoomRepository {
       bookings!left(
         status,
         actual_check_in_date_time,
+        actual_check_out_date_time,
+        check_in_date_time,
         check_out_date_time
       )
     ''');
@@ -35,6 +37,21 @@ class RoomRepository {
     debugPrint('└────┴──────────┴─────────────┴─────────────┘');
     debugPrint('Total: ${responseList.length} rooms');
     return responseList;
+  }
+
+  Future<List<RoomCardItem>> getAvailableRoomMap() async {
+    final rooms = await getRoomMap();
+    return rooms.where((room) => room.status == RoomStatus.available).toList();
+  }
+
+  Future<List<RoomCardItem>> getUsingRoomMap() async {
+    final rooms = await getRoomMap();
+    return rooms.where((room) => room.status == RoomStatus.using).toList();
+  }
+
+  Future<List<RoomCardItem>> getReservedRoomMap() async {
+    final rooms = await getRoomMap();
+    return rooms.where((room) => room.status == RoomStatus.reserved).toList();
   }
 
   Future<List<Room>> fetchRooms() async {

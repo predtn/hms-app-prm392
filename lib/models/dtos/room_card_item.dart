@@ -1,4 +1,4 @@
-enum RoomStatus { available, using }
+enum RoomStatus { available, reserved, using }
 
 class RoomCardItem {
   final int id;
@@ -24,9 +24,23 @@ class RoomCardItem {
 
     final bookings = roomData['bookings'] as List? ?? [];
 
+    final now = DateTime.now().toUtc();
+
     final isUsing = bookings.any((b) {
       final status = b['status'];
-      return status == 'checked_in';
+      final actualCheckout = b['actual_check_out_date_time'];
+      return _isCheckedIn(status) && actualCheckout == null;
+    });
+
+    final isReserved = bookings.any((b) {
+      final status = b['status'];
+      final checkout = DateTime.tryParse(
+        b['check_out_date_time'] as String? ?? '',
+      );
+
+      return _isConfirmed(status) &&
+          checkout != null &&
+          checkout.toUtc().isAfter(now);
     });
 
     return RoomCardItem(
@@ -34,8 +48,20 @@ class RoomCardItem {
       roomName: roomName,
       roomTypeName: typeName,
       imageUrl: imageUrl,
-      status: isUsing ? RoomStatus.using : RoomStatus.available,
+      status: isUsing
+          ? RoomStatus.using
+          : isReserved
+          ? RoomStatus.reserved
+          : RoomStatus.available,
     );
+  }
+
+  static bool _isCheckedIn(dynamic status) {
+    return status == 'checked_in' || status == 'checkedIn';
+  }
+
+  static bool _isConfirmed(dynamic status) {
+    return status == 'confirmed';
   }
 
   @override
