@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hms_app/models/room.dart';
 import 'package:hms_app/repositories/room_repository.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
-import 'package:hms_app/views/settings/room/add_room.dart';
+import 'package:hms_app/views/front_desk_manager/settings/room/add_room.dart';
 
 class RoomList extends StatefulWidget {
   const RoomList({super.key});
@@ -241,3 +241,5 @@ class _RoomListState extends State<RoomList> {
     );
   }
 }
+
+

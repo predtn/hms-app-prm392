@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/enums/booking_status.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
 import 'package:hms_app/repositories/room_repository.dart';
-import 'package:hms_app/widgets/room_detail_card.dart';
+import 'package:hms_app/views/receptionist/widgets/room_detail_card.dart';
 
 class RoomDetailScreen extends StatefulWidget {
   final int roomId;
@@ -287,3 +287,5 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
     );
   }
 }
+
+

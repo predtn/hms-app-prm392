@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/customer_short_detail.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
 import 'package:hms_app/repositories/booking_repository.dart';
@@ -6,20 +6,28 @@ import 'package:hms_app/repositories/room_repository.dart';
 import 'package:hms_app/repositories/user_repository.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/date_diff.dart';
-import 'package:hms_app/widgets/date_time_picker.dart';
-import 'package:hms_app/widgets/room_detail_card.dart';
+import 'package:hms_app/utils/format_vnd.dart';
+import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
 
-class CreateBookingScreen extends StatefulWidget {
-  const CreateBookingScreen({super.key, required this.roomId});
+class CreateBookingManyScreen extends StatefulWidget {
+  const CreateBookingManyScreen({
+    super.key,
+    required this.roomIds,
+    this.checkIn,
+    this.checkOut,
+  });
 
-  final int roomId;
+  final Set<int> roomIds;
+  final DateTime? checkIn;
+  final DateTime? checkOut;
 
   @override
-  State<CreateBookingScreen> createState() => _CreateBookingScreenState();
+  State<CreateBookingManyScreen> createState() =>
+      _CreateBookingManyScreenState();
 }
 
-class _CreateBookingScreenState extends State<CreateBookingScreen> {
-  late Future<RoomDetails> _roomDetailsFuture;
+class _CreateBookingManyScreenState extends State<CreateBookingManyScreen> {
+  late Future<List<RoomDetails>> _roomDetailsFuture;
   final _roomRepository = RoomRepository();
   final _bookingRepository = BookingRepository();
   final _userRepository = UserRepository();
@@ -37,7 +45,11 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
   @override
   void initState() {
     super.initState();
-    _roomDetailsFuture = _roomRepository.getRoomDetails(widget.roomId);
+    _checkIn = widget.checkIn;
+    _checkOut = widget.checkOut;
+    _roomDetailsFuture = Future.wait(
+      widget.roomIds.map((id) => _roomRepository.getRoomDetails(id)),
+    );
     _customersFuture = _userRepository.getAllCustomers();
   }
 
@@ -126,15 +138,27 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
         userId = _selectedCustomer!.userId;
       }
 
-      await _bookingRepository.createBooking(
-        roomId: widget.roomId,
-        userId: userId,
-        checkInDateTime: _checkIn!,
-        checkOutDateTime: _checkOut!,
-        checkInNow: _checkInNow,
-      );
+      // Create a booking for each selected room
+      for (final roomId in widget.roomIds) {
+        await _bookingRepository.createBooking(
+          roomId: roomId,
+          userId: userId,
+          checkInDateTime: _checkIn!,
+          checkOutDateTime: _checkOut!,
+          checkInNow: _checkInNow,
+        );
+      }
       if (mounted) {
-        Navigator.pop(context, true);
+        final customer = CustomerShortDetail(
+          userId: userId,
+          name: name,
+          phone: phone,
+        );
+        Navigator.of(context).pushReplacementNamed('/find-customer');
+        Navigator.of(context).pushNamed(
+          '/customer-bookings/$userId',
+          arguments: customer,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -151,7 +175,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<RoomDetails>(
+    return FutureBuilder<List<RoomDetails>>(
       future: _roomDetailsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -163,22 +187,116 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
             appBar: AppBar(title: const Text('Lỗi')),
             body: Center(child: Text('Lỗi: ${snapshot.error}')),
           );
-        } else if (!snapshot.hasData) {
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Scaffold(
             appBar: AppBar(title: const Text('Không tìm thấy')),
             body: const Center(child: Text('Không tìm thấy phòng')),
           );
         }
 
-        final room = snapshot.data!;
+        final rooms = snapshot.data!;
 
         return Scaffold(
-          appBar: AppBar(title: Text('Đặt phòng ${room.roomName}')),
+          appBar: AppBar(title: Text('Đặt ${rooms.length} phòng')),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // ── Section 1: Room details ──────────────────────────
-              RoomDetailCard(room: room),
+              // ── Section 1: Room details (expandable) ──
+              Card(
+                clipBehavior: Clip.antiAlias,
+                child: ExpansionTile(
+                  initiallyExpanded: true,
+                  leading: const Icon(Icons.bed),
+                  title: Text(
+                    '${rooms.length} phòng đã chọn',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    '${formatVND(rooms.fold(0, (sum, r) => sum + r.pricePerNight))} VND/đêm',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  children: rooms
+                      .map(
+                        (room) => Column(
+                          children: [
+                            const Divider(height: 1),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: room.imageUrl != null
+                                        ? Image.network(
+                                            room.imageUrl!,
+                                            width: 64,
+                                            height: 64,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, _, _) =>
+                                                _imagePlaceholder(),
+                                          )
+                                        : _imagePlaceholder(),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Phòng ${room.roomName} - ${room.typeName}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.bed,
+                                              size: 13,
+                                              color: Colors.grey,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '${room.numberOfBed} giường  •  Tầng ${room.floor}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${formatVND(room.pricePerNight)} VND/đêm',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.green,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
 
               const SizedBox(height: 20),
 
@@ -398,4 +516,15 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
       },
     );
   }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      width: 64,
+      height: 64,
+      color: Colors.grey[300],
+      child: const Icon(Icons.image, color: Colors.grey),
+    );
+  }
 }
+
+

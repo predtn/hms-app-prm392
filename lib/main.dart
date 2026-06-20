@@ -1,31 +1,31 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hms_app/providers/color_provider.dart';
 import 'package:hms_app/providers/pricing_config_provider.dart';
 import 'package:hms_app/models/enums/user_role.dart';
-import 'package:hms_app/views/bill_details_view.dart';
-import 'package:hms_app/views/booking_details_view.dart';
-import 'package:hms_app/views/check_out_view.dart';
-import 'package:hms_app/views/create_booking.dart';
-import 'package:hms_app/views/booking_search_view.dart';
-import 'package:hms_app/views/customer_bookings_view.dart';
-import 'package:hms_app/views/find_room_view.dart';
+import 'package:hms_app/views/receptionist/bill_details_view.dart';
+import 'package:hms_app/views/receptionist/booking_details_view.dart';
+import 'package:hms_app/views/receptionist/check_out_view.dart';
+import 'package:hms_app/views/receptionist/create_booking.dart';
+import 'package:hms_app/views/receptionist/booking_search_view.dart';
+import 'package:hms_app/views/receptionist/customer_bookings_view.dart';
+import 'package:hms_app/views/receptionist/find_room_view.dart';
 import 'package:hms_app/views/my_profile_view.dart';
-import 'package:hms_app/views/payment_view.dart';
-import 'package:hms_app/views/room_details_view.dart';
-import 'package:hms_app/views/settings/penalty_fee_config/penalty_fee_config.dart';
-import 'package:hms_app/views/settings/room/add_room.dart';
-import 'package:hms_app/views/settings/room/room_list.dart';
-import 'package:hms_app/views/settings/room_type/room_type_list.dart';
-import 'package:hms_app/views/settings/service/create_service_view.dart';
-import 'package:hms_app/views/settings/service/service_list.dart';
+import 'package:hms_app/views/receptionist/payment_view.dart';
+import 'package:hms_app/views/receptionist/room_details_view.dart';
+import 'package:hms_app/views/front_desk_manager/settings/penalty_fee_config/penalty_fee_config.dart';
+import 'package:hms_app/views/front_desk_manager/settings/room/add_room.dart';
+import 'package:hms_app/views/front_desk_manager/settings/room/room_list.dart';
+import 'package:hms_app/views/front_desk_manager/settings/room_type/room_type_list.dart';
+import 'package:hms_app/views/front_desk_manager/settings/service/create_service_view.dart';
+import 'package:hms_app/views/front_desk_manager/settings/service/service_list.dart';
 import 'package:hms_app/views/settings_view.dart';
-import 'package:hms_app/views/stay_management.dart';
-import 'package:hms_app/views/reception/reception_tasks_view.dart';
+import 'package:hms_app/views/receptionist/stay_management.dart';
+import 'package:hms_app/views/receptionist/reception_tasks_view.dart';
 import 'package:hms_app/models/dtos/customer_short_detail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'views/room_map_view.dart';
-import 'views/login_view.dart';
+import 'package:hms_app/views/receptionist/room_map_view.dart';
+import 'package:hms_app/views/login_view.dart';
 import 'package:provider/provider.dart';
 import 'package:hms_app/providers/theme_provider.dart';
 import 'package:hms_app/providers/user_provider.dart';
@@ -336,3 +336,6 @@ class HMSApp extends StatelessWidget {
     );
   }
 }
+
+
+

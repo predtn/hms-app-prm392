@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hms_app/providers/theme_provider.dart';
 import 'package:hms_app/providers/user_provider.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
@@ -153,3 +153,4 @@ class _SettingsViewState extends State<SettingsView> {
     );
   }
 }
+

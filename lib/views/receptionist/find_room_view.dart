@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/room_search_result.dart';
 import 'package:hms_app/models/dtos/room_type_option.dart';
 import 'package:hms_app/repositories/room_type_repository.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
 import 'package:hms_app/repositories/room_repository.dart';
-import 'package:hms_app/views/booking_many_view.dart';
-import 'package:hms_app/widgets/date_time_picker.dart';
+import 'package:hms_app/views/receptionist/booking_many_view.dart';
+import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
 
 class FindRoomView extends StatefulWidget {
   const FindRoomView({super.key});
@@ -508,3 +508,5 @@ class _ImagePlaceholder extends StatelessWidget {
     );
   }
 }
+
+

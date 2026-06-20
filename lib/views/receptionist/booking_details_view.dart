@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/enums/booking_status.dart';
 import 'package:hms_app/repositories/booking_repository.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
-import 'package:hms_app/widgets/date_time_picker.dart';
+import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
   final int bookingId;
@@ -401,3 +401,5 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     );
   }
 }
+
+

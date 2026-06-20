@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/billing_item.dart';
 import 'package:hms_app/models/dtos/booking_details.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
@@ -12,7 +12,7 @@ import 'package:hms_app/repositories/room_repository.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/calculate_room_price.dart';
 import 'package:hms_app/utils/format_vnd.dart';
-import 'package:hms_app/widgets/time_row.dart';
+import 'package:hms_app/views/receptionist/widgets/time_row.dart';
 import 'package:provider/provider.dart';
 import 'package:hms_app/models/enums/user_role.dart';
 
@@ -669,3 +669,5 @@ class _CheckOutViewState extends State<CheckOutView> {
     );
   }
 }
+
+

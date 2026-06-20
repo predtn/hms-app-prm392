@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/booking_details.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
 import 'package:hms_app/models/fee.dart';
@@ -6,7 +6,7 @@ import 'package:hms_app/repositories/booking_repository.dart';
 import 'package:hms_app/repositories/fee_repository.dart';
 import 'package:hms_app/repositories/room_repository.dart';
 import 'package:hms_app/utils/format_vnd.dart';
-import 'package:hms_app/widgets/time_row.dart';
+import 'package:hms_app/views/receptionist/widgets/time_row.dart';
 
 class BillDetailsView extends StatefulWidget {
   final int bookingId;
@@ -375,3 +375,5 @@ class _FeeSection extends StatelessWidget {
     );
   }
 }
+
+

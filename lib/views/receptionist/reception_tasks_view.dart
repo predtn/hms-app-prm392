@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/dtos/reception_task_data.dart';
 import 'package:hms_app/models/enums/reception_task_type.dart';
 import 'package:hms_app/repositories/booking_repository.dart';
-import 'package:hms_app/views/reception/reception_task_list_view.dart';
-import 'package:hms_app/views/reception/widgets/reception_task_widgets.dart';
+import 'package:hms_app/views/receptionist/reception_task_list_view.dart';
+import 'package:hms_app/views/receptionist/widgets/reception_task_widgets.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
 
 class ReceptionTasksView extends StatefulWidget {
@@ -231,3 +231,4 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
     );
   }
 }
+
