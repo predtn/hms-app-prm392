@@ -13,6 +13,7 @@ import 'package:hms_app/views/receptionist/find_room_view.dart';
 import 'package:hms_app/views/my_profile_view.dart';
 import 'package:hms_app/views/receptionist/payment_view.dart';
 import 'package:hms_app/views/receptionist/room_details_view.dart';
+import 'package:hms_app/views/front_desk_manager/reports/revenue_report_view.dart';
 import 'package:hms_app/views/front_desk_manager/settings/penalty_fee_config/penalty_fee_config.dart';
 import 'package:hms_app/views/front_desk_manager/settings/room/add_room.dart';
 import 'package:hms_app/views/front_desk_manager/settings/room/room_list.dart';
@@ -178,6 +179,10 @@ class HMSApp extends StatelessWidget {
         '/settings': (context) => const RoleGuard(
           isAllowed: _canOpenSettings,
           child: SettingsView(),
+        ),
+        '/revenue-report': (context) => const RoleGuard(
+          isAllowed: _canManageHotelConfig,
+          child: RevenueReportView(),
         ),
         '/profile': (context) => const MyProfileView(),
         '/room-type-list': (context) => const RoleGuard(

@@ -77,7 +77,21 @@ class _LoginViewState extends State<LoginView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // ── Icon and App Title Section ─────────────────────
-                Icon(Icons.hotel_rounded, size: 64, color: colorScheme.primary),
+                Center(
+                  child: Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Icon(
+                      Icons.apartment_rounded,
+                      size: 52,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'HMS App',
@@ -146,12 +160,20 @@ class _LoginViewState extends State<LoginView> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            'Đăng nhập',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        : const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.login_rounded),
+                              SizedBox(width: 8),
+                              Text(
+                                'Đăng nhập',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                   ),
                 ),

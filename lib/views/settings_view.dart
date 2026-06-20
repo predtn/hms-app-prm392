@@ -93,6 +93,15 @@ class _SettingsViewState extends State<SettingsView> {
                 Navigator.pushNamed(context, '/penalty-fee-config');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.analytics_outlined, color: Colors.teal),
+              trailing: const Icon(Icons.chevron_right),
+              title: const Text('Báo cáo doanh thu'),
+              subtitle: const Text('Theo dõi doanh thu và vận hành'),
+              onTap: () {
+                Navigator.pushNamed(context, '/revenue-report');
+              },
+            ),
             const Divider(),
           ],
           Padding(

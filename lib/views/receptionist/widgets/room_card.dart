@@ -98,7 +98,7 @@ class RoomCard extends StatelessWidget {
                     right: 12,
                     bottom: 10,
                     child: Text(
-                      'Phong ${room.roomName}',
+                      'Phòng ${room.roomName}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -121,7 +121,7 @@ class RoomCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      room.roomTypeName.isEmpty ? 'Loai phong' : room.roomTypeName,
+                      room.roomTypeName.isEmpty ? 'Loại phòng' : room.roomTypeName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall?.copyWith(

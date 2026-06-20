@@ -88,11 +88,15 @@ class AppDrawer extends StatelessWidget {
   }
 
   Future<void> _handleLogout(BuildContext context) async {
-    Navigator.of(context).pop(); // close drawer first
+    final navigator = Navigator.of(context);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    navigator.pop(); // close drawer first
     await Supabase.instance.client.auth.signOut();
-    if (context.mounted) {
-      Provider.of<UserProvider>(context, listen: false).clearUser();
-      Navigator.of(context).pushReplacementNamed('/login');
+
+    userProvider.clearUser();
+    if (navigator.mounted) {
+      navigator.pushNamedAndRemoveUntil('/login', (route) => false);
     }
   }
 

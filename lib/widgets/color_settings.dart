@@ -7,11 +7,7 @@ class ColorSettings extends StatelessWidget {
     Colors.blue,
     Colors.purple,
     Colors.green,
-    Colors.orange,
-    Colors.red,
     Colors.teal,
-    Colors.pink,
-    Colors.indigo,
   ];
 
   const ColorSettings({super.key});
