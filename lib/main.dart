@@ -131,7 +131,7 @@ class HMSApp extends StatelessWidget {
     final colorProvider = Provider.of<ColorProvider>(context);
 
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'HMS App',
       themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
       // 1. Light Theme

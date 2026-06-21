@@ -130,7 +130,6 @@ class BookingRepository {
 
   Future<List<BookingScheduleItem>> getTodayCheckins() async {
     final now = DateTime.now();
-    final startOfToday = DateTime(now.year, now.month, now.day).toUtc();
     final endOfToday = DateTime(now.year, now.month, now.day + 1).toUtc();
 
     final response = await _supabase
@@ -148,7 +147,6 @@ class BookingRepository {
         ''')
         .eq('status', BookingStatus.confirmed.toDatabaseValue())
         .isFilter('actual_check_in_date_time', null)
-        .gte('check_in_date_time', startOfToday.toIso8601String())
         .lt('check_in_date_time', endOfToday.toIso8601String())
         .order('check_in_date_time', ascending: true);
 
