@@ -17,10 +17,31 @@ class _RoomDetailCardState extends State<RoomDetailCard> {
   bool get _hasAddOn =>
       widget.room.addOn != null && widget.room.addOn!.trim().isNotEmpty;
 
+  List<String> get _addOnChips {
+    if (widget.room.addOn == null) return [];
+    return widget.room.addOn!
+        .split(RegExp(r'[,;\n]'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Card(
-      clipBehavior: Clip.antiAlias, // makes InkWell ripple respect card border
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      color: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withAlpha(120),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: _hasAddOn
             ? () => setState(() => _addOnExpanded = !_addOnExpanded)
@@ -30,75 +51,97 @@ class _RoomDetailCardState extends State<RoomDetailCard> {
           children: [
             // ── Main info ────────────────────────────────────
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center, // chevron centered
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Thumbnail
-                if (widget.room.imageUrl != null)
-                  Image.network(
-                    widget.room.imageUrl!,
-                    width: 110,
-                    height: 110,
-                    fit: BoxFit.cover,
+                // Thumbnail with nice rounded corner left side
+                if (widget.room.imageUrl != null &&
+                    widget.room.imageUrl!.isNotEmpty)
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      bottomLeft: Radius.circular(16),
+                    ),
+                    child: Image.network(
+                      widget.room.imageUrl!,
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _ImageFallback(colorScheme: colorScheme),
+                    ),
                   )
                 else
-                  Container(
-                    width: 110,
-                    height: 110,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image, color: Colors.grey),
-                  ),
+                  _ImageFallback(colorScheme: colorScheme),
 
                 // Text details
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 10, 0, 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Phòng ${widget.room.roomName} - ${widget.room.typeName}',
-                          style: const TextStyle(
-                            fontSize: 15,
+                          'Phòng ${widget.room.roomName}',
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
                           ),
-                          maxLines: 2,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.room.typeName.isEmpty
+                              ? 'Loại phòng'
+                              : widget.room.typeName,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            const Icon(Icons.bed, size: 14, color: Colors.grey),
+                            Icon(
+                              Icons.king_bed_outlined,
+                              size: 16,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                             const SizedBox(width: 4),
                             Text(
-                              '${widget.room.numberOfBed} giường  •  Tầng ${widget.room.floor}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
+                              '${widget.room.numberOfBed} giường',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Icon(
+                              Icons.layers_outlined,
+                              size: 16,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Tầng ${widget.room.floor}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         Text(
                           '${formatVND(widget.room.pricePerNight)} VND/đêm',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
                             color: Colors.green,
                           ),
                         ),
-                        if (widget.room.description != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.room.description!,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
                       ],
                     ),
                   ),
@@ -106,35 +149,75 @@ class _RoomDetailCardState extends State<RoomDetailCard> {
 
                 if (_hasAddOn)
                   Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.only(right: 12),
                     child: AnimatedRotation(
                       turns: _addOnExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 200),
-                      child: const Icon(Icons.keyboard_arrow_down),
+                      child: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
               ],
             ),
 
+            if (widget.room.description != null &&
+                widget.room.description!.trim().isNotEmpty) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Text(
+                  widget.room.description!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+
             // ── Add-on panel ─────────────────────────────────────
             if (_hasAddOn && _addOnExpanded) ...[
               const Divider(height: 1),
               Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Tiện ích kèm theo',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      widget.room.addOn!,
-                      style: const TextStyle(fontSize: 13, height: 1.5),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: _addOnChips.map((chipText) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withAlpha(15),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: colorScheme.primary.withAlpha(40),
+                            ),
+                          ),
+                          child: Text(
+                            chipText,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
@@ -142,6 +225,32 @@ class _RoomDetailCardState extends State<RoomDetailCard> {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ImageFallback extends StatelessWidget {
+  const _ImageFallback({required this.colorScheme});
+
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          bottomLeft: Radius.circular(16),
+        ),
+      ),
+      child: Icon(
+        Icons.hotel_outlined,
+        size: 36,
+        color: colorScheme.onSurfaceVariant.withAlpha(150),
       ),
     );
   }

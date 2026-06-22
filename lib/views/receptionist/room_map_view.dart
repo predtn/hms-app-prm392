@@ -68,12 +68,16 @@ class _RoomMapViewState extends State<RoomMapView> {
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Danh sách phòng'),
-        actions: [
-          IconButton(onPressed: _loadRooms, icon: const Icon(Icons.refresh)),
-        ],
+        centerTitle: true,
+        backgroundColor: color.surface,
+        iconTheme: IconThemeData(color: color.onSurface),
+        elevation: 0,
+        actions: [IconButton(onPressed: _loadRooms, icon: Icon(Icons.refresh))],
       ),
       drawer: const AppDrawer(),
       body: Column(

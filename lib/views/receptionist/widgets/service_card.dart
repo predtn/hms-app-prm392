@@ -37,6 +37,12 @@ class _ServiceCardState extends State<ServiceCard> {
     final cs = Theme.of(context).colorScheme;
 
     return Card(
+      elevation: 0,
+      color: cs.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: cs.outlineVariant.withAlpha(120), width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(

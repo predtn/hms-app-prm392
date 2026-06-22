@@ -53,9 +53,7 @@ class _BookingSearchViewState extends State<BookingSearchView> {
     setState(() {
       _filteredCustomers = query.isEmpty
           ? _allCustomers
-          : _allCustomers
-              .where((c) => c.phone.contains(query))
-              .toList();
+          : _allCustomers.where((c) => c.phone.contains(query)).toList();
     });
   }
 
@@ -64,7 +62,16 @@ class _BookingSearchViewState extends State<BookingSearchView> {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('Tìm khách hàng')),
+      appBar: AppBar(
+        title: Text(
+          'Tìm kiếm khách hàng',
+          style: TextStyle(color: colorScheme.onSurface),
+        ),
+        centerTitle: true,
+        backgroundColor: colorScheme.surface,
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        elevation: 0,
+      ),
       drawer: const AppDrawer(),
       body: Column(
         children: [
@@ -140,6 +147,15 @@ class _CustomerCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      color: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withAlpha(120),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -148,8 +164,8 @@ class _CustomerCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundImage: (customer.avatar != null &&
-                        customer.avatar!.isNotEmpty)
+                backgroundImage:
+                    (customer.avatar != null && customer.avatar!.isNotEmpty)
                     ? NetworkImage(customer.avatar!)
                     : null,
                 child: (customer.avatar == null || customer.avatar!.isEmpty)

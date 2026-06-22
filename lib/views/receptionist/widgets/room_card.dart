@@ -27,9 +27,14 @@ class RoomCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 3,
-      shadowColor: Colors.black.withAlpha(35),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withAlpha(120),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => RoomDetailScreen(roomId: room.id)),
@@ -46,9 +51,8 @@ class RoomCard extends StatelessWidget {
                     Image.network(
                       room.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _RoomImageFallback(
-                        colorScheme: colorScheme,
-                      ),
+                      errorBuilder: (_, _, _) =>
+                          _RoomImageFallback(colorScheme: colorScheme),
                     )
                   else
                     _RoomImageFallback(colorScheme: colorScheme),
@@ -121,7 +125,9 @@ class RoomCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      room.roomTypeName.isEmpty ? 'Loại phòng' : room.roomTypeName,
+                      room.roomTypeName.isEmpty
+                          ? 'Loại phòng'
+                          : room.roomTypeName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall?.copyWith(
@@ -161,11 +167,11 @@ class RoomCard extends StatelessWidget {
                           child: Text(
                             isOccupied
                                 ? (room.upcomingBookingCount > 0
-                                    ? 'Đang SD & ${room.upcomingBookingCount} khách sắp tới'
-                                    : 'Đang có khách lưu trú')
+                                      ? 'Đang SD & ${room.upcomingBookingCount} khách sắp tới'
+                                      : 'Đang có khách lưu trú')
                                 : (room.upcomingBookingCount > 0
-                                    ? 'Trống & ${room.upcomingBookingCount} khách sắp tới'
-                                    : 'Sẵn sàng nhận khách'),
+                                      ? 'Trống & ${room.upcomingBookingCount} khách sắp tới'
+                                      : 'Sẵn sàng nhận khách'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -203,5 +209,3 @@ class _RoomImageFallback extends StatelessWidget {
     );
   }
 }
-
-

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/room_search_result.dart';
 import 'package:hms_app/models/dtos/room_type_option.dart';
 import 'package:hms_app/repositories/room_type_repository.dart';
@@ -161,7 +161,10 @@ class _FindRoomViewState extends State<FindRoomView> {
     return Scaffold(
       backgroundColor: color.surface,
       appBar: AppBar(
-        title: Text('Đặt nhiều phòng', style: TextStyle(color: color.onSurface)),
+        title: Text(
+          'Đặt nhiều phòng',
+          style: TextStyle(color: color.onSurface),
+        ),
         centerTitle: true,
         backgroundColor: color.surface,
         iconTheme: IconThemeData(color: color.onSurface),
@@ -174,78 +177,117 @@ class _FindRoomViewState extends State<FindRoomView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Date pickers ──────────────────────────────────────────────
-            DateTimePicker(
-              label: 'Nhận phòng',
-              icon: Icons.login,
-              value: _formatDate(checkInDate),
-              onTap: () => _selectDate(context, true),
-            ),
-            const SizedBox(height: 12),
-            DateTimePicker(
-              label: 'Trả phòng',
-              icon: Icons.logout,
-              value: _formatDate(checkOutDate),
-              onTap: () => _selectDate(context, false),
-            ),
-            const SizedBox(height: 12),
-
-            // ── Bed count ─────────────────────────────────────────────────
-            TextField(
-              controller: bedNumberController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(color: color.onSurface),
-              decoration: InputDecoration(
-                labelText: 'Số lượng giường chính',
-                labelStyle: TextStyle(color: color.onSurfaceVariant),
-                prefixIcon: Icon(Icons.bed, color: color.primary),
-                border: const OutlineInputBorder(),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: color.outline),
+            Row(
+              children: [
+                Expanded(
+                  child: DateTimePicker(
+                    label: 'Nhận phòng',
+                    icon: Icons.login,
+                    value: _formatDate(checkInDate),
+                    onTap: () => _selectDate(context, true),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: color.primary, width: 2),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DateTimePicker(
+                    label: 'Trả phòng',
+                    icon: Icons.logout,
+                    value: _formatDate(checkOutDate),
+                    onTap: () => _selectDate(context, false),
+                  ),
                 ),
-              ),
+              ],
             ),
             const SizedBox(height: 16),
 
-            // ── Room type filter ──────────────────────────────────────────
-            Text(
-              'Loại Phòng',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: color.onSurface,
+            // ── Bed count and Room type filters card ──────────────────────
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: color.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: color.outlineVariant.withAlpha(120),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: bedNumberController,
+                    keyboardType: TextInputType.number,
+                    style: TextStyle(color: color.onSurface),
+                    decoration: InputDecoration(
+                      labelText: 'Số giường chính',
+                      labelStyle: TextStyle(color: color.onSurfaceVariant),
+                      prefixIcon: Icon(Icons.bed, color: color.primary),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: color.outline.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: color.primary, width: 2),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                        horizontal: 16,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Lọc theo Loại Phòng',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: color.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (_roomTypes.isEmpty)
+                    LinearProgressIndicator(color: color.primary)
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _roomTypes
+                          .map(
+                            (type) => FilterChip(
+                              label: Text(type.typeName),
+                              selected: selectedRoomTypeIds.contains(type.id),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              onSelected: (_) => _toggleRoomType(type),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            if (_roomTypes.isEmpty)
-              LinearProgressIndicator(color: color.primary)
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _roomTypes
-                    .map(
-                      (type) => FilterChip(
-                        label: Text(type.typeName),
-                        selected: selectedRoomTypeIds.contains(type.id),
-                        onSelected: (_) => _toggleRoomType(type),
-                      ),
-                    )
-                    .toList(),
-              ),
-
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // ── Search button ─────────────────────────────────────────────
             SizedBox(
               width: double.infinity,
+              height: 48,
               child: ElevatedButton.icon(
                 onPressed: _isLoading ? null : _searchRooms,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: color.primary,
                   foregroundColor: color.onPrimary,
                   disabledBackgroundColor: color.surfaceContainerHighest,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 1,
                 ),
                 icon: _isLoading
                     ? SizedBox(
@@ -257,7 +299,10 @@ class _FindRoomViewState extends State<FindRoomView> {
                         ),
                       )
                     : const Icon(Icons.search),
-                label: const Text('Tìm kiếm'),
+                label: const Text(
+                  'Tìm kiếm phòng trống',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
 
@@ -270,9 +315,12 @@ class _FindRoomViewState extends State<FindRoomView> {
               Center(child: CircularProgressIndicator(color: color.primary))
             else if (_filteredRooms.isEmpty)
               Center(
-                child: Text(
-                  'Không có phòng nào phù hợp.',
-                  style: TextStyle(color: color.onSurfaceVariant),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(
+                    'Không có phòng nào phù hợp.',
+                    style: TextStyle(color: color.onSurfaceVariant),
+                  ),
                 ),
               )
             else
@@ -290,28 +338,34 @@ class _FindRoomViewState extends State<FindRoomView> {
       ),
 
       // ── Book button ───────────────────────────────────────────────────
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ElevatedButton(
-          onPressed: selectedRoomIds.isNotEmpty
-              ? () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CreateBookingManyScreen(
-                      roomIds: selectedRoomIds,
-                      checkIn: checkInDate,
-                      checkOut: checkOutDate,
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: ElevatedButton(
+            onPressed: selectedRoomIds.isNotEmpty
+                ? () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CreateBookingManyScreen(
+                        roomIds: selectedRoomIds,
+                        checkIn: checkInDate,
+                        checkOut: checkOutDate,
+                      ),
                     ),
-                  ),
-                )
-              : null,
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
-          ),
-          child: Text(
-            selectedRoomIds.isEmpty
-                ? 'Đặt Phòng'
-                : 'Đặt Phòng (${selectedRoomIds.length})',
+                  )
+                : null,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              selectedRoomIds.isEmpty
+                  ? 'Đặt Phòng'
+                  : 'Đặt Phòng (${selectedRoomIds.length})',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
           ),
         ),
       ),
@@ -343,8 +397,15 @@ class _RoomTypeGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: color.surfaceContainer,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      elevation: 0,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: color.outlineVariant.withAlpha(120),
+          width: 1,
+        ),
+      ),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         initiallyExpanded: true,
@@ -368,7 +429,7 @@ class _RoomTypeGroup extends StatelessWidget {
   }
 }
 
-// ── Title hiển thị the collapsed/expanded ExpansionTile Title ────────────────
+// ── Header shown in the collapsed/expanded ExpansionTile title ────────────────
 
 class _GroupHeader extends StatelessWidget {
   const _GroupHeader({
@@ -387,19 +448,19 @@ class _GroupHeader extends StatelessWidget {
     return Row(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           child: first.imageUrl != null
               ? Image.network(
                   first.imageUrl!,
-                  width: 56,
-                  height: 56,
+                  width: 64,
+                  height: 64,
                   fit: BoxFit.cover,
                   errorBuilder: (_, _, _) =>
-                      _ImagePlaceholder(color: color, size: 56),
+                      _ImagePlaceholder(color: color, size: 64),
                 )
-              : _ImagePlaceholder(color: color, size: 56),
+              : _ImagePlaceholder(color: color, size: 64),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,26 +469,28 @@ class _GroupHeader extends StatelessWidget {
                 first.typeName,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
+                  fontSize: 16,
                   color: color.onSurface,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 selectedCount > 0
                     ? '${rooms.length} phòng · $selectedCount đã chọn'
                     : '${rooms.length} phòng trống',
                 style: TextStyle(
                   fontSize: 12,
+                  fontWeight: FontWeight.w500,
                   color: selectedCount > 0
                       ? color.primary
                       : color.onSurfaceVariant,
                 ),
               ),
               if (first.description != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   first.description!,
-                  style: TextStyle(fontSize: 12, color: color.onSurfaceVariant),
+                  style: TextStyle(fontSize: 11, color: color.onSurfaceVariant),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -457,33 +520,50 @@ class _RoomTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: color.outlineVariant.withValues(alpha: 0.4)),
-            left: isSelected
-                ? BorderSide(color: color.primary, width: 3)
-                : BorderSide.none,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: isSelected ? color.primary.withValues(alpha: 0.08) : null,
+            border: Border.all(
+              color: isSelected
+                  ? color.primary.withValues(alpha: 0.3)
+                  : Colors.transparent,
+            ),
           ),
-          color: isSelected ? color.primary.withValues(alpha: 0.06) : null,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Phòng ${room.roomName}',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 15,
-                  color: color.onSurface,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Icon(
+                Icons.meeting_room_outlined,
+                size: 20,
+                color: isSelected ? color.primary : color.onSurfaceVariant,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Phòng ${room.roomName}',
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontSize: 15,
+                    color: isSelected ? color.primary : color.onSurface,
+                  ),
                 ),
               ),
-            ),
-            if (isSelected) Icon(Icons.check_circle, color: color.primary),
-          ],
+              if (isSelected)
+                Icon(Icons.check_circle_rounded, color: color.primary)
+              else
+                Icon(
+                  Icons.radio_button_off_outlined,
+                  size: 20,
+                  color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -508,5 +588,3 @@ class _ImagePlaceholder extends StatelessWidget {
     );
   }
 }
-
-

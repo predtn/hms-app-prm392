@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/billing_item.dart';
 import 'package:hms_app/models/dtos/booking_details.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
@@ -105,7 +105,6 @@ class _CheckOutViewState extends State<CheckOutView> {
       widget.bookingId,
     );
     final room = await _roomRepository.getRoomDetails(booking.roomId);
-    // Initialise billing items from fetched booking data
     if (mounted) {
       setState(() {
         _initBillingItems(booking);
@@ -155,7 +154,11 @@ class _CheckOutViewState extends State<CheckOutView> {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Thêm phí phát sinh'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Thêm phí phát sinh',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: Form(
           key: formKey,
           child: Column(
@@ -165,7 +168,9 @@ class _CheckOutViewState extends State<CheckOutView> {
                 controller: titleController,
                 decoration: const InputDecoration(
                   labelText: 'Tên khoản phí *',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
                     ? 'Vui lòng nhập tên'
@@ -177,7 +182,9 @@ class _CheckOutViewState extends State<CheckOutView> {
                 controller: subtitleController,
                 decoration: const InputDecoration(
                   labelText: 'Ghi chú (tuỳ chọn)',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
                 ),
                 textInputAction: TextInputAction.next,
               ),
@@ -186,7 +193,9 @@ class _CheckOutViewState extends State<CheckOutView> {
                 controller: priceController,
                 decoration: const InputDecoration(
                   labelText: 'Số tiền (đ) *',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (v) {
@@ -210,6 +219,11 @@ class _CheckOutViewState extends State<CheckOutView> {
             child: const Text('Huỷ'),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             onPressed: () {
               if (!formKey.currentState!.validate()) return;
               final price = int.parse(
@@ -238,14 +252,21 @@ class _CheckOutViewState extends State<CheckOutView> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch the pricing config to rebuild when it changes
     final pricingConfig = context.watch<PricingConfigProvider>().config;
     final canManageHotelConfig =
         context.watch<UserProvider>().userProfile?.role.canManageHotelConfig ??
         false;
+    final color = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Check Out')),
+      backgroundColor: color.surface,
+      appBar: AppBar(
+        title: const Text('Check Out'),
+        centerTitle: true,
+        backgroundColor: color.surface,
+        iconTheme: IconThemeData(color: color.onSurface),
+        elevation: 0,
+      ),
       body: FutureBuilder<_CheckoutData>(
         future: _dataFuture,
         builder: (context, snapshot) {
@@ -260,7 +281,6 @@ class _CheckOutViewState extends State<CheckOutView> {
           final data = snapshot.data!;
           final room = data.room;
           final booking = data.booking;
-          final colorScheme = Theme.of(context).colorScheme;
           final textTheme = Theme.of(context).textTheme;
 
           final roomFeeItems = _getRoomFeeItems(
@@ -270,87 +290,136 @@ class _CheckOutViewState extends State<CheckOutView> {
           );
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             children: [
-              // ── Room and guest information ────────────────────────────────────
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image section
-                  if (room.imageUrl != null)
-                    Image.network(
-                      room.imageUrl!,
-                      width: 110,
-                      height: 110,
-                      fit: BoxFit.cover,
-                    )
-                  else
-                    Container(
-                      width: 110,
-                      height: 110,
-                      color: colorScheme.surfaceContainerHighest,
-                      child: Icon(
-                        Icons.image,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-
-                  // Content section
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Phòng ${room.roomName} - ${room.typeName}',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Khách: ${booking.customerName}',
-                            style: const TextStyle(fontSize: 14),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 8),
-                          RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: colorScheme.onSurface,
-                              ),
-                              children: [
-                                const TextSpan(text: 'Trạng thái: '),
-                                TextSpan(
-                                  text: 'Đang ở',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.primary,
+              // ── Room and guest information (custom card matching the user's preferred design) ──
+              Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: color.outlineVariant.withAlpha(120),
+                    width: 1,
+                  ),
+                ),
+                color: color.surfaceContainerLow,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Image section with nice borders
+                      if (room.imageUrl != null && room.imageUrl!.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            room.imageUrl!,
+                            width: 90,
+                            height: 90,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  width: 90,
+                                  height: 90,
+                                  color: color.surfaceContainerHighest,
+                                  child: Icon(
+                                    Icons.hotel_outlined,
+                                    color: color.onSurfaceVariant,
                                   ),
                                 ),
-                              ],
-                            ),
                           ),
-                        ],
+                        )
+                      else
+                        Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            color: color.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.hotel_outlined,
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+
+                      const SizedBox(width: 16),
+
+                      // Content section
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Phòng ${room.roomName}',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: color.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              room.typeName,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Khách: ${booking.customerName}',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: color.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.primary.withAlpha(20),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: color.primary.withAlpha(50),
+                          ),
+                        ),
+                        child: Text(
+                          'Đang ở',
+                          style: TextStyle(
+                            color: color.primary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-              // End Room details section
-              const Divider(height: 32),
+
+              const SizedBox(height: 16),
 
               // ── Stay Duration Card ─────────────────────────────────────
               Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: color.outlineVariant.withAlpha(120),
+                    width: 1,
+                  ),
+                ),
+                color: color.surfaceContainerLow,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -358,12 +427,12 @@ class _CheckOutViewState extends State<CheckOutView> {
                     children: [
                       Text(
                         'Thời gian lưu trú',
-                        style: textTheme.labelLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color.onSurface,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // Row 1: Scheduled check-in
                       buildTimeRow(
                         context,
                         icon: Icons.login_outlined,
@@ -376,11 +445,10 @@ class _CheckOutViewState extends State<CheckOutView> {
                           horizontal: 8,
                         ),
                         child: SizedBox(
-                          height: 16,
+                          height: 12,
                           child: VerticalDivider(width: 1, thickness: 1),
                         ),
                       ),
-                      // Row 2: Actual check-in
                       buildTimeRow(
                         context,
                         icon: Icons.login,
@@ -395,11 +463,10 @@ class _CheckOutViewState extends State<CheckOutView> {
                           horizontal: 8,
                         ),
                         child: SizedBox(
-                          height: 16,
+                          height: 12,
                           child: VerticalDivider(width: 1, thickness: 1),
                         ),
                       ),
-                      // Row 3: Scheduled check-out
                       buildTimeRow(
                         context,
                         icon: Icons.logout_outlined,
@@ -412,11 +479,10 @@ class _CheckOutViewState extends State<CheckOutView> {
                           horizontal: 8,
                         ),
                         child: SizedBox(
-                          height: 16,
+                          height: 12,
                           child: VerticalDivider(width: 1, thickness: 1),
                         ),
                       ),
-                      // Row 4: Actual check-out (DateTime.now() as placeholder when null)
                       buildTimeRow(
                         context,
                         icon: Icons.logout,
@@ -429,71 +495,126 @@ class _CheckOutViewState extends State<CheckOutView> {
                 ),
               ),
 
-              const SizedBox(height: 12),
-
-              const Divider(height: 32),
+              const SizedBox(height: 24),
 
               // ── Billing Summary ───────────────────────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    'Chi tiết thanh toán',
-                    style: textTheme.labelLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.payment_outlined,
+                        size: 20,
+                        color: color.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Chi tiết thanh toán',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
-                  TextButton.icon(
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                    ),
                     onPressed: _showAddExtraItemDialog,
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Thêm phí'),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: const Text(
+                      'Thêm phí',
+                      style: TextStyle(fontSize: 13),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
 
               // ── Services sub-section ─────────────────────────────────────
               Text(
-                'Dịch vụ',
-                style: textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                'Dịch vụ đã dùng',
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                color: color.surfaceContainerLow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: color.outlineVariant.withAlpha(120),
+                    width: 1,
+                  ),
+                ),
                 child: _billingItems.isEmpty
                     ? const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Center(child: Text('Không có dịch vụ nào')),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 24,
+                          horizontal: 16,
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Không sử dụng dịch vụ nào',
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
                       )
                     : Column(
                         children: [
                           for (int i = 0; i < _billingItems.length; i++) ...[
                             ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
                               title: Text(
                                 _billingItems[i].title,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 14,
                                 ),
                               ),
-                              subtitle: Text(_billingItems[i].subtitle),
+                              subtitle: Text(
+                                _billingItems[i].subtitle,
+                                style: const TextStyle(fontSize: 12),
+                              ),
                               trailing: Text(
                                 '${formatVND(_billingItems[i].price)} đ',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontSize: 15,
+                                  color: color.primary,
                                 ),
                               ),
                             ),
                             if (i < _billingItems.length - 1)
-                              const Divider(height: 1),
+                              Divider(
+                                height: 1,
+                                color: color.outlineVariant.withAlpha(80),
+                              ),
                           ],
                         ],
                       ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
 
               // ── Room Fee sub-section ──────────────────────────────────────
               Row(
@@ -502,89 +623,151 @@ class _CheckOutViewState extends State<CheckOutView> {
                 children: [
                   Text(
                     'Tiền phòng',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: color.onSurfaceVariant,
                     ),
                   ),
                   if (canManageHotelConfig)
                     TextButton.icon(
-                      icon: const Icon(Icons.money_outlined, size: 18),
-                      label: const Text('Cài đặt phụ phí'),
+                      icon: const Icon(Icons.settings_outlined, size: 16),
+                      label: const Text(
+                        'Cấu hình phụ thu',
+                        style: TextStyle(fontSize: 12),
+                      ),
                       onPressed: () {
                         Navigator.pushNamed(context, '/penalty-fee-config');
                       },
                     ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                color: color.surfaceContainerLow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: color.outlineVariant.withAlpha(120),
+                    width: 1,
+                  ),
+                ),
                 child: Column(
                   children: [
                     for (int i = 0; i < roomFeeItems.length; i++) ...[
                       ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
                         title: Text(
                           roomFeeItems[i].title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(roomFeeItems[i].subtitle),
-                        trailing: Text(
-                          '${formatVND(roomFeeItems[i].price)} đ',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          roomFeeItems[i].subtitle,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: Text(
+                          '${formatVND(roomFeeItems[i].price)} đ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: color.primary,
                           ),
                         ),
                       ),
-                      if (i < roomFeeItems.length - 1) const Divider(height: 1),
+                      if (i < roomFeeItems.length - 1)
+                        Divider(
+                          height: 1,
+                          color: color.outlineVariant.withAlpha(80),
+                        ),
                     ],
                   ],
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
 
               // ── Extra Fee sub-section ─────────────────────────────────────
               Text(
-                'Phí phát sinh',
-                style: textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                'Phí phát sinh khác',
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                color: color.surfaceContainerLow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: color.outlineVariant.withAlpha(120),
+                    width: 1,
+                  ),
+                ),
                 child: _extraItems.isEmpty
                     ? const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Center(child: Text('Chưa có phí phát sinh')),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 24,
+                          horizontal: 16,
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Chưa có khoản phí phát sinh nào',
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
                       )
                     : Column(
                         children: [
                           for (int i = 0; i < _extraItems.length; i++) ...[
                             ListTile(
+                              contentPadding: const EdgeInsets.only(
+                                left: 16,
+                                right: 8,
+                                top: 4,
+                                bottom: 4,
+                              ),
                               title: Text(
                                 _extraItems[i].title,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 14,
                                 ),
                               ),
-                              subtitle: Text(_extraItems[i].subtitle),
+                              subtitle: Text(
+                                _extraItems[i].subtitle,
+                                style: const TextStyle(fontSize: 12),
+                              ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     '${formatVND(_extraItems[i].price)} đ',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: 15,
+                                      color: color.primary,
                                     ),
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 8),
                                   IconButton(
                                     icon: const Icon(
                                       Icons.delete_outline,
                                       size: 20,
                                     ),
-                                    color: Colors.red,
+                                    color: Colors.redAccent,
                                     tooltip: 'Xoá',
                                     onPressed: () {
                                       setState(() => _extraItems.removeAt(i));
@@ -594,7 +777,10 @@ class _CheckOutViewState extends State<CheckOutView> {
                               ),
                             ),
                             if (i < _extraItems.length - 1)
-                              const Divider(height: 1),
+                              Divider(
+                                height: 1,
+                                color: color.outlineVariant.withAlpha(80),
+                              ),
                           ],
                         ],
                       ),
@@ -620,48 +806,71 @@ class _CheckOutViewState extends State<CheckOutView> {
             ..._extraItems,
           ].fold(0, (sum, item) => sum + item.price);
 
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Tổng cộng',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      '${formatVND(totalAmount)} đ',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+          return Container(
+            decoration: BoxDecoration(
+              color: color.surfaceContainerLow,
+              border: Border(
+                top: BorderSide(
+                  color: color.outlineVariant.withAlpha(120),
+                  width: 1,
                 ),
-                const SizedBox(height: 8),
-                FilledButton(
-                  onPressed: _isCheckingOut ? null : () => _goToPayment(roomFeeItems),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Tổng cộng thanh toán',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${formatVND(totalAmount)} đ',
+                        style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                          color: color.primary,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: _isCheckingOut
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: _isCheckingOut
+                        ? null
+                        : () => _goToPayment(roomFeeItems),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isCheckingOut
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Xác nhận Thanh toán & Check out',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
-                        )
-                      : const Text('Thanh toán'),
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -669,5 +878,3 @@ class _CheckOutViewState extends State<CheckOutView> {
     );
   }
 }
-
-

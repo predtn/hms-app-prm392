@@ -50,10 +50,7 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
       _bookingRepository.getUpcomingCheckouts(threshold: _soonThreshold),
     ]);
 
-    return ReceptionTaskData(
-      checkins: results[0],
-      checkouts: results[1],
-    );
+    return ReceptionTaskData(checkins: results[0], checkouts: results[1]);
   }
 
   void _loadTasks() {
@@ -143,12 +140,7 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
 
   bool _isNoShow(BookingScheduleItem item, DateTime now) {
     final checkin = item.checkInDateTime.toLocal();
-    final noShowCutoff = DateTime(
-      checkin.year,
-      checkin.month,
-      checkin.day,
-      18,
-    );
+    final noShowCutoff = DateTime(checkin.year, checkin.month, checkin.day, 18);
 
     return now.isAfter(noShowCutoff) || now.isAtSameMomentAs(noShowCutoff);
   }
@@ -160,7 +152,9 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
         .toList();
   }
 
-  List<BookingScheduleItem> _upcomingCheckouts(List<BookingScheduleItem> items) {
+  List<BookingScheduleItem> _upcomingCheckouts(
+    List<BookingScheduleItem> items,
+  ) {
     final now = DateTime.now();
     return items.where((item) {
       final checkout = item.checkoutDateTime.toLocal();
@@ -184,15 +178,17 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Việc cần xử lý'),
+        title: Text('Việc cần xử lý', style: TextStyle(color: color.onSurface)),
+        centerTitle: true,
+        backgroundColor: color.surface,
+        iconTheme: IconThemeData(color: color.onSurface),
+        elevation: 0,
         actions: [
-          IconButton(
-            tooltip: 'Làm mới',
-            onPressed: _loadTasks,
-            icon: const Icon(Icons.refresh),
-          ),
+          IconButton(onPressed: _loadTasks, icon: const Icon(Icons.refresh)),
         ],
       ),
       drawer: const AppDrawer(),
@@ -258,4 +254,3 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
     );
   }
 }
-

@@ -16,6 +16,7 @@ class SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
     final themeProvider = Provider.of<ThemeProvider>(context);
     final canManageHotelConfig =
         context.watch<UserProvider>().userProfile?.role.canManageHotelConfig ??
@@ -31,7 +32,16 @@ class _SettingsViewState extends State<SettingsView> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cài đặt')),
+      appBar: AppBar(
+        title: Text(
+          'Cài đặt hệ thống',
+          style: TextStyle(color: color.onSurface),
+        ),
+        centerTitle: true,
+        backgroundColor: color.surface,
+        iconTheme: IconThemeData(color: color.onSurface),
+        elevation: 0,
+      ),
       drawer: const AppDrawer(),
       body: ListView(
         children: [
@@ -162,4 +172,3 @@ class _SettingsViewState extends State<SettingsView> {
     );
   }
 }
-
