@@ -301,7 +301,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
                     );
                   },
                 ),
-                // Selected customer card
+                // Selected Customer Card
                 if (_selectedCustomer != null) ...[
                   const SizedBox(height: 12),
                   Card(

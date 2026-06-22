@@ -125,7 +125,7 @@ class _BookingSearchViewState extends State<BookingSearchView> {
   }
 }
 
-// ── Customer card widget ──────────────────────────────────────────────────────
+// ── Customer Card widget ──────────────────────────────────────────────────────
 
 class _CustomerCard extends StatelessWidget {
   final CustomerShortDetail customer;

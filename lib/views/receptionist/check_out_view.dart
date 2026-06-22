@@ -346,7 +346,7 @@ class _CheckOutViewState extends State<CheckOutView> {
                   ),
                 ],
               ),
-              // End room details section
+              // End Room details section
               const Divider(height: 32),
 
               // ── Stay Duration Card ─────────────────────────────────────

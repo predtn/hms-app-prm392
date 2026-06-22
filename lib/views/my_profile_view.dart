@@ -86,7 +86,7 @@ class _MyProfileViewState extends State<MyProfileView> {
     try {
       String? updatedAvatarUrl = _userProfile!.avatarUrl;
 
-      // If a new avatar file was chosen, upload it first
+      // If a new Avatar file was chosen, upload it first
       if (_newAvatarFile != null) {
         if (updatedAvatarUrl != null && updatedAvatarUrl.isNotEmpty) {
           await deleteFromStorage(updatedAvatarUrl);

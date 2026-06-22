@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/room_card_item.dart';
 import 'package:hms_app/repositories/room_repository.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
@@ -70,7 +70,7 @@ class _RoomMapViewState extends State<RoomMapView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sơ đồ phòng'),
+        title: const Text('Danh sách phòng'),
         actions: [
           IconButton(onPressed: _loadRooms, icon: const Icon(Icons.refresh)),
         ],
@@ -78,7 +78,7 @@ class _RoomMapViewState extends State<RoomMapView> {
       drawer: const AppDrawer(),
       body: Column(
         children: [
-          // ── Bộ lọc ──────────────────────────────────────────────
+          // ── Filter ──────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Wrap(
@@ -98,7 +98,7 @@ class _RoomMapViewState extends State<RoomMapView> {
             ),
           ),
 
-          // ── Lưới phòng ──────────────────────────────────────────
+          // ── Room grid ──────────────────────────────────────────
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -127,7 +127,7 @@ class _RoomMapViewState extends State<RoomMapView> {
                                       : 2,
                                   crossAxisSpacing: 14,
                                   mainAxisSpacing: 14,
-                                  childAspectRatio: 0.78,
+                                  childAspectRatio: 0.72,
                                 ),
                             itemCount: _filteredRooms.length,
                             itemBuilder: (context, index) =>
@@ -140,5 +140,3 @@ class _RoomMapViewState extends State<RoomMapView> {
     );
   }
 }
-
-

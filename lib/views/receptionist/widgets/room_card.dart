@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/room_card_item.dart';
 import 'package:hms_app/views/receptionist/room_details_view.dart';
 
@@ -113,9 +113,9 @@ class RoomCard extends StatelessWidget {
               ),
             ),
             Expanded(
-              flex: 4,
+              flex: 5,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -139,11 +139,33 @@ class RoomCard extends StatelessWidget {
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
+                            '${room.numberOfBeds} giường',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.people_outline,
+                          size: 16,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
                             isOccupied
-                                ? 'Đang có khách lưu trú'
-                                : isReserved
-                                ? 'Đã có booking sắp tới'
-                                : 'Sẵn sàng nhận khách',
+                                ? (room.upcomingBookingCount > 0
+                                    ? 'Đang SD & ${room.upcomingBookingCount} khách sắp tới'
+                                    : 'Đang có khách lưu trú')
+                                : (room.upcomingBookingCount > 0
+                                    ? 'Trống & ${room.upcomingBookingCount} khách sắp tới'
+                                    : 'Sẵn sàng nhận khách'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(

@@ -28,7 +28,7 @@ class _RoomDetailCardState extends State<RoomDetailCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Main info row ────────────────────────────────────
+            // ── Main info ────────────────────────────────────
             Row(
               crossAxisAlignment: CrossAxisAlignment.center, // chevron centered
               children: [
@@ -104,7 +104,6 @@ class _RoomDetailCardState extends State<RoomDetailCard> {
                   ),
                 ),
 
-                // Chevron — vertically centered, tap handled by InkWell
                 if (_hasAddOn)
                   Padding(
                     padding: const EdgeInsets.only(right: 8),

@@ -19,7 +19,7 @@ class AppDrawerDestination {
 
 const List<AppDrawerDestination> drawerDestinations = [
   AppDrawerDestination(
-    'Sơ đồ phòng',
+    'Danh sách phòng',
     Icon(Icons.map_outlined),
     Icon(Icons.map),
     '/room-map',
@@ -31,19 +31,19 @@ const List<AppDrawerDestination> drawerDestinations = [
     '/upcoming-checkouts',
   ),
   AppDrawerDestination(
-    'Tìm phòng phù hợp',
+    'Đặt nhiều phòng',
     Icon(Icons.search),
     Icon(Icons.search),
     '/find-room',
   ),
   AppDrawerDestination(
-    'Tìm thông tin khách hàng',
+    'Thông tin khách hàng',
     Icon(Icons.person_search_outlined),
     Icon(Icons.person_search),
     '/find-customer',
   ),
   AppDrawerDestination(
-    'Cài đặt',
+    'Cài đặt hệ thống',
     Icon(Icons.settings_outlined),
     Icon(Icons.settings),
     '/settings',
@@ -101,7 +101,6 @@ class AppDrawer extends StatelessWidget {
   }
 
   void _handleDestinationSelected(BuildContext context, int index) {
-    // logout tap
     final profile = Provider.of<UserProvider>(context, listen: false).userProfile;
     final destinations = _getDestinationsForRole(profile?.role);
 

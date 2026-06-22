@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/room_card_item.dart';
 import 'package:hms_app/models/dtos/room_search_result.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
@@ -13,7 +12,7 @@ class RoomRepository {
     final response = await _supabase.from('rooms').select('''
       id,
       room_name,
-      room_types(type_name, image_url),
+      room_types(type_name, image_url, number_of_bed),
       bookings!left(
         status,
         actual_check_in_date_time,
@@ -26,16 +25,6 @@ class RoomRepository {
     var responseList = (response as List)
         .map((roomData) => RoomCardItem.mapRoomCardItem(roomData))
         .toList();
-    debugPrint('┌────┬──────────┬─────────────┬─────────────┐');
-    debugPrint('│ ID │ Room     │ Type        │ Status      │');
-    debugPrint('├────┼──────────┼─────────────┼─────────────┤');
-    for (final r in responseList) {
-      debugPrint(
-        '│ ${r.id.toString().padRight(3)}│ ${r.roomName.padRight(9)}│ ${r.roomTypeName.padRight(12)}│ ${r.status.name.padRight(12)}│',
-      );
-    }
-    debugPrint('└────┴──────────┴─────────────┴─────────────┘');
-    debugPrint('Total: ${responseList.length} rooms');
     return responseList;
   }
 

@@ -6,6 +6,8 @@ class RoomCardItem {
   final String roomTypeName;
   final String? imageUrl;
   final RoomStatus status;
+  final int numberOfBeds;
+  final int upcomingBookingCount;
 
   RoomCardItem({
     required this.id,
@@ -13,6 +15,8 @@ class RoomCardItem {
     required this.roomTypeName,
     this.imageUrl,
     required this.status,
+    required this.numberOfBeds,
+    required this.upcomingBookingCount,
   });
 
   factory RoomCardItem.mapRoomCardItem(Map<String, dynamic> roomData) {
@@ -21,10 +25,9 @@ class RoomCardItem {
     final roomType = roomData['room_types'] as Map?;
     final typeName = roomType?['type_name'] as String? ?? '';
     final imageUrl = roomType?['image_url'] as String?;
+    final numberOfBeds = roomType?['number_of_bed'] as int? ?? 0;
 
     final bookings = roomData['bookings'] as List? ?? [];
-
-    final now = DateTime.now().toUtc();
 
     final isUsing = bookings.any((b) {
       final status = b['status'];
@@ -32,16 +35,14 @@ class RoomCardItem {
       return _isCheckedIn(status) && actualCheckout == null;
     });
 
-    final isReserved = bookings.any((b) {
-      final status = b['status'];
-      final checkout = DateTime.tryParse(
-        b['check_out_date_time'] as String? ?? '',
-      );
+    final upcomingBookings = bookings.where((b) {
+      final status = b['status'] as String?;
+      if (status == null) return false;
+      final normalized = status.toLowerCase().replaceAll('_', '');
+      return normalized != 'checkedout' && normalized != 'checkedin';
+    }).toList();
 
-      return _isConfirmed(status) &&
-          checkout != null &&
-          checkout.toUtc().isAfter(now);
-    });
+    final isReserved = upcomingBookings.isNotEmpty;
 
     return RoomCardItem(
       id: roomId,
@@ -53,6 +54,8 @@ class RoomCardItem {
           : isReserved
           ? RoomStatus.reserved
           : RoomStatus.available,
+      numberOfBeds: numberOfBeds,
+      upcomingBookingCount: upcomingBookings.length,
     );
   }
 
@@ -60,12 +63,8 @@ class RoomCardItem {
     return status == 'checked_in' || status == 'checkedIn';
   }
 
-  static bool _isConfirmed(dynamic status) {
-    return status == 'confirmed';
-  }
-
   @override
   String toString() {
-    return 'RoomCardItem(id: $id, roomName: $roomName, roomTypeName: $roomTypeName, status: $status)';
+    return 'RoomCardItem(id: $id, roomName: $roomName, roomTypeName: $roomTypeName, status: $status, numberOfBeds: $numberOfBeds, upcomingBookingCount: $upcomingBookingCount)';
   }
 }

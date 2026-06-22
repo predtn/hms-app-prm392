@@ -161,7 +161,7 @@ class _FindRoomViewState extends State<FindRoomView> {
     return Scaffold(
       backgroundColor: color.surface,
       appBar: AppBar(
-        title: Text('Tìm Phòng', style: TextStyle(color: color.onSurface)),
+        title: Text('Đặt nhiều phòng', style: TextStyle(color: color.onSurface)),
         centerTitle: true,
         backgroundColor: color.surface,
         iconTheme: IconThemeData(color: color.onSurface),
@@ -195,7 +195,7 @@ class _FindRoomViewState extends State<FindRoomView> {
               keyboardType: TextInputType.number,
               style: TextStyle(color: color.onSurface),
               decoration: InputDecoration(
-                labelText: 'Giường chính',
+                labelText: 'Số lượng giường chính',
                 labelStyle: TextStyle(color: color.onSurfaceVariant),
                 prefixIcon: Icon(Icons.bed, color: color.primary),
                 border: const OutlineInputBorder(),
@@ -368,7 +368,7 @@ class _RoomTypeGroup extends StatelessWidget {
   }
 }
 
-// ── Header shown in the collapsed/expanded ExpansionTile title ────────────────
+// ── Title hiển thị the collapsed/expanded ExpansionTile Title ────────────────
 
 class _GroupHeader extends StatelessWidget {
   const _GroupHeader({

@@ -210,7 +210,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // ── Customer card ──────────────────────────────────────
+              // ── Customer Card ──────────────────────────────────────
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),

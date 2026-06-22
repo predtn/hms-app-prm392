@@ -150,7 +150,7 @@ class _CustomerBookingsViewState extends State<CustomerBookingsView> {
 
           const Divider(height: 32),
 
-          // ── Section header ──────────────────────────────────────────
+          // ── Title phần ──────────────────────────────────────────
           const Text(
             'Danh sách đặt phòng',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

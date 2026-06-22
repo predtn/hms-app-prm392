@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "hms-app-ebdd0"
+    "hms-app": "hms-app-ebdd0"
   },
   "targets": {},
   "etags": {}

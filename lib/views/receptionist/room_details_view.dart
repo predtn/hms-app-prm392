@@ -77,7 +77,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
               // Room details section
               RoomDetailCard(room: room),
 
-              // End room details section
+              // End Room details section
               const Divider(height: 32),
 
               FutureBuilder<List<BookingScheduleItem>>(
@@ -116,7 +116,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ── Khách đang ở ───────────────────────────────────────
+                      // ── Current guests ───────────────────────────────────────
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -199,7 +199,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
 
                       const Divider(height: 32),
 
-                      // ── Đặt phòng sắp tới ──────────────────────────────────
+                      // ── Upcoming bookings ──────────────────────────────────
                       const Text(
                         'Đặt phòng sắp tới',
                         style: TextStyle(
