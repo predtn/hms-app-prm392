@@ -52,8 +52,19 @@ class _BillDetailsViewState extends State<BillDetailsView> {
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Chi tiết hoá đơn')),
+      appBar: AppBar(
+        title: Text(
+          'Chi tiết hóa đơn',
+          style: TextStyle(color: color.onSurface),
+        ),
+        centerTitle: true,
+        backgroundColor: color.surface,
+        iconTheme: IconThemeData(color: color.onSurface),
+        elevation: 0,
+      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
         child: FilledButton(

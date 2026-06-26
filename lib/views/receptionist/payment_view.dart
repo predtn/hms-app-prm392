@@ -20,7 +20,16 @@ class _PaymentViewState extends State<PaymentView> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Thanh toán')),
+      appBar: AppBar(
+        title: Text(
+          'Thanh toán',
+          style: TextStyle(color: colorScheme.onSurface),
+        ),
+        centerTitle: true,
+        backgroundColor: colorScheme.surface,
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        elevation: 0,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
