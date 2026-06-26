@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/dtos/room_search_result.dart';
 import 'package:hms_app/models/dtos/room_type_option.dart';
-import 'package:hms_app/services/room_type_service.dart';
+import 'package:hms_app/providers/room_type_provider.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
-import 'package:hms_app/services/room_service.dart';
+import 'package:hms_app/providers/room_provider.dart';
 import 'package:hms_app/views/receptionist/booking_many_view.dart';
 import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
 
@@ -16,8 +17,8 @@ class FindRoomView extends StatefulWidget {
 }
 
 class _FindRoomViewState extends State<FindRoomView> {
-  final RoomService _roomService = RoomService();
-  final RoomTypeService _roomTypeService = RoomTypeService();
+  RoomProvider get _roomProvider => context.read<RoomProvider>();
+  RoomTypeProvider get _roomTypeProvider => context.read<RoomTypeProvider>();
   List<RoomSearchResult> _filteredRooms = [];
   List<RoomTypeOption> _roomTypes = [];
   bool _isLoading = false;
@@ -42,7 +43,7 @@ class _FindRoomViewState extends State<FindRoomView> {
 
   Future<void> _loadRoomTypes() async {
     try {
-      final types = await _roomTypeService.getRoomTypeOptions();
+      final types = await _roomTypeProvider.getRoomTypeOptions();
       setState(() => _roomTypes = types);
     } catch (e) {
       debugPrint('Error loading room types: $e');
@@ -116,7 +117,7 @@ class _FindRoomViewState extends State<FindRoomView> {
                 .map((t) => t.typeName)
                 .toList();
 
-      final rooms = await _roomService.searchRooms(
+      final rooms = await _roomProvider.searchRooms(
         numberOfBed: bedNumber,
         typeNames: selectedTypeNames,
         checkInDate: checkInDate,

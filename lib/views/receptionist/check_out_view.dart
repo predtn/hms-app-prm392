@@ -6,8 +6,8 @@ import 'package:hms_app/models/fee.dart';
 import 'package:hms_app/models/dtos/hotel_pricing_config.dart';
 import 'package:hms_app/providers/pricing_config_provider.dart';
 import 'package:hms_app/providers/user_provider.dart';
-import 'package:hms_app/services/booking_service.dart';
-import 'package:hms_app/services/room_service.dart';
+import 'package:hms_app/providers/booking_provider.dart';
+import 'package:hms_app/providers/room_provider.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/calculate_room_price.dart';
 import 'package:hms_app/utils/format_vnd.dart';
@@ -31,8 +31,8 @@ class _CheckoutData {
 }
 
 class _CheckOutViewState extends State<CheckOutView> {
-  final _bookingService = BookingService();
-  final _roomService = RoomService();
+  BookingProvider get _bookingProvider => context.read<BookingProvider>();
+  RoomProvider get _roomProvider => context.read<RoomProvider>();
   late Future<_CheckoutData> _dataFuture;
 
   List<BillingItem> _billingItems = [];
@@ -99,10 +99,10 @@ class _CheckOutViewState extends State<CheckOutView> {
   }
 
   Future<_CheckoutData> _fetchData() async {
-    final booking = await _bookingService.getBookingDetailsWithServices(
+    final booking = await _bookingProvider.getBookingDetailsWithServices(
       widget.bookingId,
     );
-    final room = await _roomService.getRoomDetails(booking.roomId);
+    final room = await _roomProvider.getRoomDetails(booking.roomId);
     if (mounted) {
       setState(() {
         _initBillingItems(booking);
@@ -127,7 +127,7 @@ class _CheckOutViewState extends State<CheckOutView> {
     setState(() => _isCheckingOut = true);
     try {
       final allItems = [..._billingItems, ...roomFeeItems, ..._extraItems];
-      await _bookingService.completeCheckout(
+      await _bookingProvider.completeCheckout(
         bookingId: widget.bookingId,
         billingItems: allItems,
       );

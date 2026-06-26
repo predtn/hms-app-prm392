@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/file_upload.dart';
-import 'package:hms_app/services/service_catalog_service.dart';
+import 'package:hms_app/providers/service_catalog_provider.dart';
 import 'package:hms_app/models/service.dart';
 
 class CreateServiceView extends StatefulWidget {
@@ -18,7 +19,8 @@ class CreateServiceView extends StatefulWidget {
 
 class _CreateServiceViewState extends State<CreateServiceView> {
   final _formKey = GlobalKey<FormState>();
-  final _serviceCatalogService = ServiceCatalogService();
+  ServiceCatalogProvider get _serviceCatalogProvider =>
+      context.read<ServiceCatalogProvider>();
 
   bool _isSaving = false;
 
@@ -90,7 +92,7 @@ class _CreateServiceViewState extends State<CreateServiceView> {
       String? finalImageUrl = uploadedImageUrl ?? widget.service?.imageUrl;
 
       if (widget.service == null) {
-        await _serviceCatalogService.createService(
+        await _serviceCatalogProvider.createService(
           name: _nameController.text.trim(),
           description: _descriptionController.text.trim().isEmpty
               ? null
@@ -101,7 +103,7 @@ class _CreateServiceViewState extends State<CreateServiceView> {
           status: _status,
         );
       } else {
-        await _serviceCatalogService.updateService(
+        await _serviceCatalogProvider.updateService(
           id: widget.service!.id,
           name: _nameController.text.trim(),
           description: _descriptionController.text.trim().isEmpty

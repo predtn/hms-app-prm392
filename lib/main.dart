@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hms_app/providers/booking_draft_provider.dart';
+import 'package:hms_app/providers/booking_provider.dart';
 import 'package:hms_app/providers/color_provider.dart';
+import 'package:hms_app/providers/fee_provider.dart';
 import 'package:hms_app/providers/pricing_config_provider.dart';
+import 'package:hms_app/providers/report_provider.dart';
+import 'package:hms_app/providers/room_provider.dart';
+import 'package:hms_app/providers/room_type_provider.dart';
+import 'package:hms_app/providers/service_catalog_provider.dart';
 import 'package:hms_app/models/enums/user_role.dart';
 import 'package:hms_app/views/receptionist/bill_details_view.dart';
 import 'package:hms_app/views/receptionist/booking_details_view.dart';
@@ -109,9 +116,16 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => BookingDraftProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => ColorProvider()),
         ChangeNotifierProvider(create: (_) => PricingConfigProvider()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
+        ChangeNotifierProvider(create: (_) => RoomProvider()),
+        ChangeNotifierProvider(create: (_) => RoomTypeProvider()),
+        ChangeNotifierProvider(create: (_) => ServiceCatalogProvider()),
+        ChangeNotifierProvider(create: (_) => FeeProvider()),
+        ChangeNotifierProvider(create: (_) => ReportProvider()),
       ],
       child: const HMSApp(),
     ),

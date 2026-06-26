@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:hms_app/models/dtos/revenue_report.dart';
-import 'package:hms_app/services/report_service.dart';
+import 'package:hms_app/providers/report_provider.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 
 class RevenueReportView extends StatefulWidget {
@@ -12,7 +13,7 @@ class RevenueReportView extends StatefulWidget {
 }
 
 class _RevenueReportViewState extends State<RevenueReportView> {
-  final _reportService = ReportService();
+  ReportProvider get _reportProvider => context.read<ReportProvider>();
   late DateTime _fromDate;
   late DateTime _toDate;
   _RevenueChartRange _chartRange = _RevenueChartRange.oneMonth;
@@ -28,7 +29,7 @@ class _RevenueReportViewState extends State<RevenueReportView> {
   }
 
   Future<RevenueReport> _loadReport() {
-    return _reportService.getRevenueReport(
+    return _reportProvider.getRevenueReport(
       fromDate: _fromDate,
       toDate: _toDate,
     );

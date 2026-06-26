@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/dtos/customer_short_detail.dart';
-import 'package:hms_app/services/user_service.dart';
+import 'package:hms_app/providers/user_provider.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
 
 class BookingSearchView extends StatefulWidget {
@@ -11,7 +12,7 @@ class BookingSearchView extends StatefulWidget {
 }
 
 class _BookingSearchViewState extends State<BookingSearchView> {
-  final _userService = UserService();
+  UserProvider get _userProvider => context.read<UserProvider>();
   final _searchController = TextEditingController();
   List<CustomerShortDetail> _allCustomers = [];
   List<CustomerShortDetail> _filteredCustomers = [];
@@ -32,7 +33,7 @@ class _BookingSearchViewState extends State<BookingSearchView> {
 
   Future<void> _loadCustomers() async {
     try {
-      final customers = await _userService.getAllCustomers();
+      final customers = await _userProvider.getAllCustomers();
       if (mounted) {
         setState(() {
           _allCustomers = customers;

@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:hms_app/models/user_profile.dart';
-import 'package:hms_app/services/user_service.dart';
+import 'package:hms_app/providers/user_provider.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/file_upload.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
-import 'package:hms_app/providers/user_provider.dart';
 
 class MyProfileView extends StatefulWidget {
   const MyProfileView({super.key});
@@ -19,7 +18,7 @@ class MyProfileView extends StatefulWidget {
 
 class _MyProfileViewState extends State<MyProfileView> {
   final _formKey = GlobalKey<FormState>();
-  final _userService = UserService();
+  UserProvider get _userProvider => context.read<UserProvider>();
 
   UserProfile? _userProfile;
   bool _isLoading = true;
@@ -112,7 +111,7 @@ class _MyProfileViewState extends State<MyProfileView> {
         }
       }
 
-      await _userService.updateUserProfile(
+      await _userProvider.updateUserProfile(
         id: _userProfile!.id,
         fullName: _fullNameController.text.trim(),
         phone: _phoneController.text.trim(),

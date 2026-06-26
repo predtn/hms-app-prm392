@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/dtos/booking_details.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
 import 'package:hms_app/models/fee.dart';
-import 'package:hms_app/services/booking_service.dart';
-import 'package:hms_app/services/fee_service.dart';
-import 'package:hms_app/services/room_service.dart';
+import 'package:hms_app/providers/booking_provider.dart';
+import 'package:hms_app/providers/fee_provider.dart';
+import 'package:hms_app/providers/room_provider.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/views/receptionist/widgets/time_row.dart';
 
@@ -29,9 +30,9 @@ class _BillDetailsData {
 }
 
 class _BillDetailsViewState extends State<BillDetailsView> {
-  final _bookingService = BookingService();
-  final _roomService = RoomService();
-  final _feeService = FeeService();
+  BookingProvider get _bookingProvider => context.read<BookingProvider>();
+  RoomProvider get _roomProvider => context.read<RoomProvider>();
+  FeeProvider get _feeProvider => context.read<FeeProvider>();
 
   late final Future<_BillDetailsData> _dataFuture;
 
@@ -42,11 +43,11 @@ class _BillDetailsViewState extends State<BillDetailsView> {
   }
 
   Future<_BillDetailsData> _fetchData() async {
-    final booking = await _bookingService.getBookingDetailsWithServices(
+    final booking = await _bookingProvider.getBookingDetailsWithServices(
       widget.bookingId,
     );
-    final room = await _roomService.getRoomDetails(booking.roomId);
-    final fees = await _feeService.getFeesByBookingId(widget.bookingId);
+    final room = await _roomProvider.getRoomDetails(booking.roomId);
+    final fees = await _feeProvider.getFeesByBookingId(widget.bookingId);
     return _BillDetailsData(booking: booking, room: room, fees: fees);
   }
 

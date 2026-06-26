@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/dtos/customer_short_detail.dart';
 import 'package:hms_app/models/enums/booking_status.dart';
-import 'package:hms_app/services/booking_service.dart';
+import 'package:hms_app/providers/booking_provider.dart';
 
 class CustomerBookingsView extends StatefulWidget {
   final CustomerShortDetail customer;
@@ -15,7 +16,7 @@ class CustomerBookingsView extends StatefulWidget {
 
 class _CustomerBookingsViewState extends State<CustomerBookingsView> {
   late Future<List<BookingScheduleItem>> _bookingsFuture;
-  final _bookingService = BookingService();
+  BookingProvider get _bookingProvider => context.read<BookingProvider>();
 
   // Index corresponding to BookingStatus order:
   // 0 → confirmed, 1 → checkedIn, 2 → checkedOut, 3 → noShow
@@ -49,7 +50,7 @@ class _CustomerBookingsViewState extends State<CustomerBookingsView> {
   }
 
   void _loadBookings() {
-    _bookingsFuture = _bookingService.getBookingsByCustomerId(
+    _bookingsFuture = _bookingProvider.getBookingsByCustomerId(
       widget.customer.userId,
     );
   }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/room.dart';
-import 'package:hms_app/services/room_service.dart';
-import 'package:hms_app/services/room_type_service.dart';
+import 'package:hms_app/providers/room_provider.dart';
+import 'package:hms_app/providers/room_type_provider.dart';
 import 'package:hms_app/models/dtos/room_type_option.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 
@@ -16,8 +17,8 @@ class AddRoom extends StatefulWidget {
 
 class _AddRoomState extends State<AddRoom> {
   final _formKey = GlobalKey<FormState>();
-  final _roomService = RoomService();
-  final _roomTypeService = RoomTypeService();
+  RoomProvider get _roomProvider => context.read<RoomProvider>();
+  RoomTypeProvider get _roomTypeProvider => context.read<RoomTypeProvider>();
 
   final _floorController = TextEditingController();
   final _roomNameController = TextEditingController();
@@ -43,13 +44,13 @@ class _AddRoomState extends State<AddRoom> {
 
   Future<void> _loadData() async {
     try {
-      final options = await _roomTypeService.getRoomTypeOptions();
+      final options = await _roomTypeProvider.getRoomTypeOptions();
       setState(() {
         _roomTypeOptions = options;
       });
 
       if (isEditing) {
-        final room = await _roomService.getRoomById(widget.roomId!);
+        final room = await _roomProvider.getRoomById(widget.roomId!);
         _roomNameController.text = room.roomName;
         _floorController.text = room.floor.toString();
 
@@ -90,7 +91,7 @@ class _AddRoomState extends State<AddRoom> {
           roomTypeId: _selectedRoomType!.id,
           floor: int.parse(_floorController.text.trim()),
         );
-        await _roomService.updateRoom(updatedRoom);
+        await _roomProvider.updateRoom(updatedRoom);
       } else {
         final newRoom = Room(
           id: 0, // Ignored by the database usually or omit for insert
@@ -98,7 +99,7 @@ class _AddRoomState extends State<AddRoom> {
           roomTypeId: _selectedRoomType!.id,
           floor: int.parse(_floorController.text.trim()),
         );
-        await _roomService.createRoom(newRoom);
+        await _roomProvider.createRoom(newRoom);
       }
 
       if (mounted) {

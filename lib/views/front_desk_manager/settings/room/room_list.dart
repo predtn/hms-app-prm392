@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/room.dart';
-import 'package:hms_app/services/room_service.dart';
+import 'package:hms_app/providers/room_provider.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/views/front_desk_manager/settings/room/add_room.dart';
 
@@ -12,7 +13,7 @@ class RoomList extends StatefulWidget {
 }
 
 class _RoomListState extends State<RoomList> {
-  final RoomService _roomService = RoomService();
+  RoomProvider get _roomProvider => context.read<RoomProvider>();
   List<Room> _rooms = [];
   List<Room> _filteredRooms = [];
   bool _isLoading = true;
@@ -35,7 +36,7 @@ class _RoomListState extends State<RoomList> {
   Future<void> _loadRooms() async {
     setState(() => _isLoading = true);
     try {
-      final rooms = await _roomService.fetchRooms();
+      final rooms = await _roomProvider.fetchRooms();
       setState(() {
         _rooms = rooms;
         _filteredRooms = rooms;
@@ -82,7 +83,7 @@ class _RoomListState extends State<RoomList> {
     if (confirm != true) return;
 
     try {
-      await _roomService.deleteRoom(id);
+      await _roomProvider.deleteRoom(id);
       if (mounted) {
         ScaffoldMessenger.of(
           context,

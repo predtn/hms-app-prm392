@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/enums/booking_status.dart';
-import 'package:hms_app/services/booking_service.dart';
+import 'package:hms_app/providers/booking_provider.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
 
@@ -15,7 +16,7 @@ class BookingDetailsScreen extends StatefulWidget {
 
 class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   late Future<BookingScheduleItem> _detailsFuture;
-  final _bookingService = BookingService();
+  BookingProvider get _bookingProvider => context.read<BookingProvider>();
 
   DateTime? _checkIn;
   DateTime? _checkOut;
@@ -26,7 +27,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _detailsFuture = _bookingService.getBookingDetails(widget.bookingId);
+    _detailsFuture = _bookingProvider.getBookingDetails(widget.bookingId);
   }
 
   Future<void> _pickDateTime({required bool isCheckIn}) async {
@@ -56,7 +57,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       _isCheckingIn = true;
     });
     try {
-      await _bookingService.checkIn(widget.bookingId, roomId);
+      await _bookingProvider.checkIn(widget.bookingId, roomId);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -84,7 +85,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     });
 
     try {
-      await _bookingService.updateBooking(
+      await _bookingProvider.updateBooking(
         roomId: roomId,
         bookingId: widget.bookingId,
         checkInDateTime: _checkIn!,
@@ -135,7 +136,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     });
 
     try {
-      await _bookingService.deleteBooking(widget.bookingId);
+      await _bookingProvider.deleteBooking(widget.bookingId);
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {

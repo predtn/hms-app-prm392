@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/dtos/customer_short_detail.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
-import 'package:hms_app/services/booking_service.dart';
-import 'package:hms_app/services/room_service.dart';
-import 'package:hms_app/services/user_service.dart';
+import 'package:hms_app/providers/booking_draft_provider.dart';
+import 'package:hms_app/providers/booking_provider.dart';
+import 'package:hms_app/providers/room_provider.dart';
+import 'package:hms_app/providers/user_provider.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/date_diff.dart';
 import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
@@ -20,32 +22,46 @@ class CreateBookingScreen extends StatefulWidget {
 
 class _CreateBookingScreenState extends State<CreateBookingScreen> {
   late Future<RoomDetails> _roomDetailsFuture;
-  final _roomService = RoomService();
-  final _bookingService = BookingService();
-  final _userService = UserService();
+  String get _draftKey => BookingDraftProvider.singleRoomKey(widget.roomId);
+  BookingDraftProvider get _bookingDraftProvider =>
+      context.read<BookingDraftProvider>();
+  RoomProvider get _roomProvider => context.read<RoomProvider>();
+  BookingProvider get _bookingProvider => context.read<BookingProvider>();
+  UserProvider get _userProvider => context.read<UserProvider>();
 
-  final _guestNameController = TextEditingController();
-  final _phoneController = TextEditingController();
+  late final TextEditingController _guestNameController;
+  late final TextEditingController _phoneController;
   late Future<List<CustomerShortDetail>> _customersFuture;
-  bool _isNewCustomer = true;
-  CustomerShortDetail? _selectedCustomer;
-  bool _checkInNow = false;
-  DateTime? _checkIn;
-  DateTime? _checkOut;
   bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    _roomDetailsFuture = _roomService.getRoomDetails(widget.roomId);
-    _customersFuture = _userService.getAllCustomers();
+    _bookingDraftProvider.initializeDraft(_draftKey);
+    final draft = _bookingDraftProvider.getDraft(_draftKey);
+    _guestNameController = TextEditingController(text: draft.guestName);
+    _phoneController = TextEditingController(text: draft.phone);
+    _guestNameController.addListener(_syncGuestName);
+    _phoneController.addListener(_syncPhone);
+    _roomDetailsFuture = _roomProvider.getRoomDetails(widget.roomId);
+    _customersFuture = _userProvider.getAllCustomers();
   }
 
   @override
   void dispose() {
+    _guestNameController.removeListener(_syncGuestName);
+    _phoneController.removeListener(_syncPhone);
     _guestNameController.dispose();
     _phoneController.dispose();
     super.dispose();
+  }
+
+  void _syncGuestName() {
+    _bookingDraftProvider.setGuestName(_draftKey, _guestNameController.text);
+  }
+
+  void _syncPhone() {
+    _bookingDraftProvider.setPhone(_draftKey, _phoneController.text);
   }
 
   Future<void> _pickDateTime({required bool isCheckIn}) async {
@@ -61,13 +77,11 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
 
     final result = DateTime(date.year, date.month, date.day, hour, 0);
 
-    setState(() {
-      if (isCheckIn) {
-        _checkIn = result;
-      } else {
-        _checkOut = result;
-      }
-    });
+    if (isCheckIn) {
+      _bookingDraftProvider.setCheckIn(_draftKey, result);
+    } else {
+      _bookingDraftProvider.setCheckOut(_draftKey, result);
+    }
   }
 
   String _formatDateTime(DateTime? dt) {
@@ -78,23 +92,24 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
   Future<void> _submitBooking() async {
     final String name;
     final String phone;
+    final draft = _bookingDraftProvider.getDraft(_draftKey);
 
-    if (_isNewCustomer) {
+    if (draft.isNewCustomer) {
       name = _guestNameController.text.trim();
       phone = _phoneController.text.trim();
     } else {
-      name = _selectedCustomer?.name ?? '';
-      phone = _selectedCustomer?.phone ?? '';
+      name = draft.selectedCustomer?.name ?? '';
+      phone = draft.selectedCustomer?.phone ?? '';
     }
 
     if (name.isEmpty ||
         phone.isEmpty ||
-        _checkIn == null ||
-        _checkOut == null) {
+        draft.checkIn == null ||
+        draft.checkOut == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isNewCustomer
+            draft.isNewCustomer
                 ? 'Vui lòng điền đầy đủ thông tin'
                 : 'Vui lòng chọn khách và điền thời gian',
           ),
@@ -103,7 +118,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
       return;
     }
 
-    if (dateDiffAtLeastOne(_checkIn!, _checkOut!)) {
+    if (dateDiffAtLeastOne(draft.checkIn!, draft.checkOut!)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -120,20 +135,21 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
 
     try {
       final String userId;
-      if (_isNewCustomer) {
-        userId = await _userService.getNewlyCreatedCustomerId(name, phone);
+      if (draft.isNewCustomer) {
+        userId = await _userProvider.getNewlyCreatedCustomerId(name, phone);
       } else {
-        userId = _selectedCustomer!.userId;
+        userId = draft.selectedCustomer!.userId;
       }
 
-      await _bookingService.createBooking(
+      await _bookingProvider.createBooking(
         roomId: widget.roomId,
         userId: userId,
-        checkInDateTime: _checkIn!,
-        checkOutDateTime: _checkOut!,
-        checkInNow: _checkInNow,
+        checkInDateTime: draft.checkIn!,
+        checkOutDateTime: draft.checkOut!,
+        checkInNow: draft.checkInNow,
       );
       if (mounted) {
+        _bookingDraftProvider.clearDraft(_draftKey);
         Navigator.pop(context, true);
       }
     } catch (e) {
@@ -171,6 +187,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
         }
 
         final room = snapshot.data!;
+        final draft = context.watch<BookingDraftProvider>().getDraft(_draftKey);
 
         return Scaffold(
           appBar: AppBar(title: Text('Đặt phòng ${room.roomName}')),
@@ -191,11 +208,12 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   ToggleButtons(
-                    isSelected: [_isNewCustomer, !_isNewCustomer],
+                    isSelected: [draft.isNewCustomer, !draft.isNewCustomer],
                     onPressed: (index) {
-                      setState(() {
-                        _isNewCustomer = index == 0;
-                      });
+                      _bookingDraftProvider.setIsNewCustomer(
+                        _draftKey,
+                        index == 0,
+                      );
                     },
                     borderRadius: BorderRadius.circular(8),
                     constraints: const BoxConstraints(
@@ -210,7 +228,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              if (_isNewCustomer) ...[
+              if (draft.isNewCustomer) ...[
                 // New customer: fill in name + phone
                 TextField(
                   controller: _guestNameController,
@@ -255,8 +273,8 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
                       enableFilter: true,
                       expandedInsets: EdgeInsets.zero,
                       leadingIcon: const Icon(Icons.search),
-                      onSelected: (value) =>
-                          setState(() => _selectedCustomer = value),
+                      onSelected: (value) => _bookingDraftProvider
+                          .setSelectedCustomer(_draftKey, value),
                       dropdownMenuEntries: customers
                           .map(
                             (c) => DropdownMenuEntry<CustomerShortDetail>(
@@ -302,34 +320,36 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
                   },
                 ),
                 // Selected Customer Card
-                if (_selectedCustomer != null) ...[
+                if (draft.selectedCustomer != null) ...[
                   const SizedBox(height: 12),
                   Card(
                     // color: Theme.of(context).colorScheme.primaryContainer,
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundImage:
-                            _selectedCustomer!.avatar?.isNotEmpty == true
-                            ? NetworkImage(_selectedCustomer!.avatar!)
+                            draft.selectedCustomer!.avatar?.isNotEmpty == true
+                            ? NetworkImage(draft.selectedCustomer!.avatar!)
                             : null,
-                        child: _selectedCustomer!.avatar?.isNotEmpty == true
+                        child:
+                            draft.selectedCustomer!.avatar?.isNotEmpty == true
                             ? null
                             : Text(
-                                _selectedCustomer!.name.isNotEmpty
-                                    ? _selectedCustomer!.name[0].toUpperCase()
+                                draft.selectedCustomer!.name.isNotEmpty
+                                    ? draft.selectedCustomer!.name[0]
+                                          .toUpperCase()
                                     : '?',
                               ),
                       ),
                       title: Text(
-                        _selectedCustomer!.name,
+                        draft.selectedCustomer!.name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text(_selectedCustomer!.phone),
+                      subtitle: Text(draft.selectedCustomer!.phone),
                       trailing: IconButton(
                         icon: const Icon(Icons.close),
                         tooltip: 'Bỏ chọn',
-                        onPressed: () =>
-                            setState(() => _selectedCustomer = null),
+                        onPressed: () => _bookingDraftProvider
+                            .setSelectedCustomer(_draftKey, null),
                       ),
                     ),
                   ),
@@ -349,8 +369,8 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
               DateTimePicker(
                 label: 'Nhận phòng',
                 icon: Icons.login,
-                value: _formatDateTime(_checkIn),
-                onTap: _checkInNow
+                value: _formatDateTime(draft.checkIn),
+                onTap: draft.checkInNow
                     ? null
                     : () => _pickDateTime(
                         isCheckIn: true,
@@ -360,21 +380,19 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
               DateTimePicker(
                 label: 'Trả phòng',
                 icon: Icons.logout,
-                value: _formatDateTime(_checkOut),
+                value: _formatDateTime(draft.checkOut),
                 onTap: () => _pickDateTime(isCheckIn: false),
               ),
               //End section 3
               Row(
                 children: [
                   Checkbox(
-                    value: _checkInNow,
+                    value: draft.checkInNow,
                     onChanged: (val) {
-                      setState(() {
-                        _checkInNow = val ?? false;
-                        if (_checkInNow) {
-                          _checkIn = DateTime.now();
-                        }
-                      });
+                      _bookingDraftProvider.setCheckInNow(
+                        _draftKey,
+                        val ?? false,
+                      );
                     },
                   ),
                   const Text('Check-in ngay'),

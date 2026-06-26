@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/enums/reception_task_type.dart';
-import 'package:hms_app/services/booking_service.dart';
+import 'package:hms_app/providers/booking_provider.dart';
 import 'package:hms_app/views/receptionist/widgets/reception_task_widgets.dart';
 
 class ReceptionTaskListView extends StatefulWidget {
@@ -25,7 +26,7 @@ class ReceptionTaskListView extends StatefulWidget {
 class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
   static const _soonThreshold = Duration(minutes: 30);
 
-  final _bookingService = BookingService();
+  BookingProvider get _bookingProvider => context.read<BookingProvider>();
   final _phoneController = TextEditingController();
   late List<BookingScheduleItem> _bookings;
   String _phoneQuery = '';
@@ -64,8 +65,10 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
 
   Future<void> _reloadBookings() async {
     final allBookings = _isCheckinTask
-        ? await _bookingService.getTodayCheckins()
-        : await _bookingService.getUpcomingCheckouts(threshold: _soonThreshold);
+        ? await _bookingProvider.getTodayCheckins()
+        : await _bookingProvider.getUpcomingCheckouts(
+            threshold: _soonThreshold,
+          );
 
     if (!mounted) return;
 
@@ -219,7 +222,7 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
     if (confirmed != true || !mounted) return;
 
     try {
-      await _bookingService.markNoShow(booking.id);
+      await _bookingProvider.markNoShow(booking.id);
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(

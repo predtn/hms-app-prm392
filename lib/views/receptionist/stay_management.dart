@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hms_app/models/dtos/booking_details.dart';
 import 'package:hms_app/models/dtos/service_usage.dart';
-import 'package:hms_app/services/booking_service.dart';
-import 'package:hms_app/services/service_catalog_service.dart';
+import 'package:hms_app/providers/booking_provider.dart';
+import 'package:hms_app/providers/service_catalog_provider.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
@@ -20,8 +21,9 @@ class StayManagement extends StatefulWidget {
 
 class _StayManagementState extends State<StayManagement> {
   late Future<BookingDetails> _detailsFuture;
-  final _bookingService = BookingService();
-  final _serviceCatalogService = ServiceCatalogService();
+  BookingProvider get _bookingProvider => context.read<BookingProvider>();
+  ServiceCatalogProvider get _serviceCatalogProvider =>
+      context.read<ServiceCatalogProvider>();
   DateTime? _checkoutDateTime;
   List<ServiceUsage>? _currentUsages;
   bool _isSaving = false;
@@ -29,7 +31,7 @@ class _StayManagementState extends State<StayManagement> {
   @override
   void initState() {
     super.initState();
-    _detailsFuture = _bookingService.getBookingDetailsWithServices(
+    _detailsFuture = _bookingProvider.getBookingDetailsWithServices(
       widget.bookingId,
     );
   }
@@ -64,12 +66,12 @@ class _StayManagementState extends State<StayManagement> {
   Future<void> _saveChanges(BookingDetails details) async {
     setState(() => _isSaving = true);
     try {
-      await _serviceCatalogService.updateServiceUsage(
+      await _serviceCatalogProvider.updateServiceUsage(
         widget.bookingId,
         _currentUsages!,
       );
 
-      await _bookingService.updateBooking(
+      await _bookingProvider.updateBooking(
         roomId: details.roomId,
         bookingId: widget.bookingId,
         checkInDateTime:
