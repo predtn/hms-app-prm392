@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/enums/booking_status.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
-import 'package:hms_app/repositories/room_repository.dart';
+import 'package:hms_app/services/room_service.dart';
 import 'package:hms_app/views/receptionist/widgets/room_detail_card.dart';
 
 class RoomDetailScreen extends StatefulWidget {
@@ -17,13 +17,13 @@ class RoomDetailScreen extends StatefulWidget {
 class _RoomDetailScreenState extends State<RoomDetailScreen> {
   late Future<RoomDetails> _roomDetailsFuture;
   late Future<List<BookingScheduleItem>> _bookingScheduleFuture;
-  final _roomRepository = RoomRepository();
+  final _roomService = RoomService();
 
   @override
   void initState() {
     super.initState();
-    _roomDetailsFuture = _roomRepository.getRoomDetails(widget.roomId);
-    _bookingScheduleFuture = _roomRepository.getBookingSchedule(widget.roomId);
+    _roomDetailsFuture = _roomService.getRoomDetails(widget.roomId);
+    _bookingScheduleFuture = _roomService.getBookingSchedule(widget.roomId);
   }
 
   String _formatDateCompact(DateTime dt) {
@@ -146,7 +146,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                             icon: Icon(Icons.refresh, color: color.primary),
                             onPressed: () {
                               setState(() {
-                                _bookingScheduleFuture = _roomRepository
+                                _bookingScheduleFuture = _roomService
                                     .getBookingSchedule(widget.roomId);
                               });
                             },
@@ -312,11 +312,10 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                                           ),
                                         );
                                         setState(() {
-                                          _bookingScheduleFuture =
-                                              _roomRepository
-                                                  .getBookingSchedule(
-                                                    widget.roomId,
-                                                  );
+                                          _bookingScheduleFuture = _roomService
+                                              .getBookingSchedule(
+                                                widget.roomId,
+                                              );
                                         });
                                       }
                                     },
@@ -490,7 +489,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                                       ),
                                     );
                                     setState(() {
-                                      _bookingScheduleFuture = _roomRepository
+                                      _bookingScheduleFuture = _roomService
                                           .getBookingSchedule(widget.roomId);
                                     });
                                   }
@@ -527,8 +526,9 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                       const SnackBar(content: Text('Đặt phòng thành công!')),
                     );
                     setState(() {
-                      _bookingScheduleFuture = _roomRepository
-                          .getBookingSchedule(widget.roomId);
+                      _bookingScheduleFuture = _roomService.getBookingSchedule(
+                        widget.roomId,
+                      );
                     });
                   }
                 },

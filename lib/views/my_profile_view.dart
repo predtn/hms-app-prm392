@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:hms_app/models/user_profile.dart';
-import 'package:hms_app/repositories/user_repository.dart';
+import 'package:hms_app/services/user_service.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/file_upload.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
@@ -19,7 +19,7 @@ class MyProfileView extends StatefulWidget {
 
 class _MyProfileViewState extends State<MyProfileView> {
   final _formKey = GlobalKey<FormState>();
-  final _userRepository = UserRepository();
+  final _userService = UserService();
 
   UserProfile? _userProfile;
   bool _isLoading = true;
@@ -112,7 +112,7 @@ class _MyProfileViewState extends State<MyProfileView> {
         }
       }
 
-      await _userRepository.updateUserProfile(
+      await _userService.updateUserProfile(
         id: _userProfile!.id,
         fullName: _fullNameController.text.trim(),
         phone: _phoneController.text.trim(),

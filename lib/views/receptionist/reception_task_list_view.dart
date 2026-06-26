@@ -1,7 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/enums/reception_task_type.dart';
-import 'package:hms_app/repositories/booking_repository.dart';
+import 'package:hms_app/services/booking_service.dart';
 import 'package:hms_app/views/receptionist/widgets/reception_task_widgets.dart';
 
 class ReceptionTaskListView extends StatefulWidget {
@@ -25,7 +25,7 @@ class ReceptionTaskListView extends StatefulWidget {
 class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
   static const _soonThreshold = Duration(minutes: 30);
 
-  final _bookingRepository = BookingRepository();
+  final _bookingService = BookingService();
   final _phoneController = TextEditingController();
   late List<BookingScheduleItem> _bookings;
   String _phoneQuery = '';
@@ -64,10 +64,8 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
 
   Future<void> _reloadBookings() async {
     final allBookings = _isCheckinTask
-        ? await _bookingRepository.getTodayCheckins()
-        : await _bookingRepository.getUpcomingCheckouts(
-            threshold: _soonThreshold,
-          );
+        ? await _bookingService.getTodayCheckins()
+        : await _bookingService.getUpcomingCheckouts(threshold: _soonThreshold);
 
     if (!mounted) return;
 
@@ -80,7 +78,9 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
     if (!mounted) return;
 
     setState(() {
-      _bookings = _bookings.where((booking) => booking.id != bookingId).toList();
+      _bookings = _bookings
+          .where((booking) => booking.id != bookingId)
+          .toList();
     });
 
     await _reloadBookings();
@@ -112,12 +112,7 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
 
   bool _isNoShow(BookingScheduleItem booking, DateTime now) {
     final checkin = booking.checkInDateTime.toLocal();
-    final noShowCutoff = DateTime(
-      checkin.year,
-      checkin.month,
-      checkin.day,
-      18,
-    );
+    final noShowCutoff = DateTime(checkin.year, checkin.month, checkin.day, 18);
 
     return now.isAfter(noShowCutoff) || now.isAtSameMomentAs(noShowCutoff);
   }
@@ -224,7 +219,7 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
     if (confirmed != true || !mounted) return;
 
     try {
-      await _bookingRepository.markNoShow(booking.id);
+      await _bookingService.markNoShow(booking.id);
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -234,9 +229,9 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi xác nhận no-show: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi xác nhận no-show: $e')));
     }
   }
 
@@ -252,8 +247,8 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
           Text(
             widget.subtitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -342,4 +337,3 @@ class _ReceptionTaskListViewState extends State<ReceptionTaskListView> {
     );
   }
 }
-

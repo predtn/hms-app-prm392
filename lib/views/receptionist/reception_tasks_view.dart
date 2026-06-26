@@ -1,8 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/booking_schedule_item.dart';
 import 'package:hms_app/models/dtos/reception_task_data.dart';
 import 'package:hms_app/models/enums/reception_task_type.dart';
-import 'package:hms_app/repositories/booking_repository.dart';
+import 'package:hms_app/services/booking_service.dart';
 import 'package:hms_app/views/receptionist/reception_task_list_view.dart';
 import 'package:hms_app/views/receptionist/widgets/reception_task_widgets.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
@@ -35,7 +35,7 @@ class _TaskGroup {
 class _ReceptionTasksViewState extends State<ReceptionTasksView> {
   static const _soonThreshold = Duration(minutes: 30);
 
-  final _bookingRepository = BookingRepository();
+  final _bookingService = BookingService();
   late Future<ReceptionTaskData> _tasksFuture;
 
   @override
@@ -46,8 +46,8 @@ class _ReceptionTasksViewState extends State<ReceptionTasksView> {
 
   Future<ReceptionTaskData> _fetchTasks() async {
     final results = await Future.wait([
-      _bookingRepository.getTodayCheckins(),
-      _bookingRepository.getUpcomingCheckouts(threshold: _soonThreshold),
+      _bookingService.getTodayCheckins(),
+      _bookingService.getUpcomingCheckouts(threshold: _soonThreshold),
     ]);
 
     return ReceptionTaskData(checkins: results[0], checkouts: results[1]);

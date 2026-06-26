@@ -1,6 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/room_type.dart';
-import 'package:hms_app/repositories/room_type_repository.dart';
+import 'package:hms_app/services/room_type_service.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/views/front_desk_manager/settings/room_type/create_room_type.dart';
@@ -13,7 +13,7 @@ class RoomTypeList extends StatefulWidget {
 }
 
 class _RoomTypeListState extends State<RoomTypeList> {
-  final _roomTypeRepo = RoomTypeRepository();
+  final _roomTypeService = RoomTypeService();
   List<RoomType> _roomTypes = [];
   List<RoomType> _filteredRoomTypes = [];
   bool _isLoading = true;
@@ -36,7 +36,7 @@ class _RoomTypeListState extends State<RoomTypeList> {
   Future<void> _loadRoomTypes() async {
     setState(() => _isLoading = true);
     try {
-      final roomTypes = await _roomTypeRepo.getRoomTypes();
+      final roomTypes = await _roomTypeService.getRoomTypes();
       setState(() {
         _roomTypes = roomTypes;
         _filteredRoomTypes = roomTypes;
@@ -83,7 +83,7 @@ class _RoomTypeListState extends State<RoomTypeList> {
     if (confirm != true) return;
 
     try {
-      await _roomTypeRepo.deleteRoomType(id);
+      await _roomTypeService.deleteRoomType(id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Xóa loại phòng thành công')),
@@ -291,5 +291,3 @@ class _RoomTypeListState extends State<RoomTypeList> {
     );
   }
 }
-
-

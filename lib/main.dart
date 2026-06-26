@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hms_app/providers/color_provider.dart';
 import 'package:hms_app/providers/pricing_config_provider.dart';
@@ -37,11 +37,7 @@ bool _canOpenSettings(UserRole role) =>
     role.canManageHotelConfig || role.canManageHotelOperations;
 
 class RoleGuard extends StatelessWidget {
-  const RoleGuard({
-    super.key,
-    required this.child,
-    required this.isAllowed,
-  });
+  const RoleGuard({super.key, required this.child, required this.isAllowed});
 
   final Widget child;
   final bool Function(UserRole role) isAllowed;
@@ -90,9 +86,9 @@ class AccessDeniedView extends StatelessWidget {
               FilledButton(
                 onPressed: () {
                   final role = context.read<UserProvider>().userProfile?.role;
-                  Navigator.of(context).pushReplacementNamed(
-                    role?.defaultRoute ?? '/login',
-                  );
+                  Navigator.of(
+                    context,
+                  ).pushReplacementNamed(role?.defaultRoute ?? '/login');
                 },
                 child: const Text('Quay lại'),
               ),
@@ -176,10 +172,8 @@ class HMSApp extends StatelessWidget {
           isAllowed: _canManageHotelOperations,
           child: BookingSearchView(),
         ),
-        '/settings': (context) => const RoleGuard(
-          isAllowed: _canOpenSettings,
-          child: SettingsView(),
-        ),
+        '/settings': (context) =>
+            const RoleGuard(isAllowed: _canOpenSettings, child: SettingsView()),
         '/revenue-report': (context) => const RoleGuard(
           isAllowed: _canManageHotelConfig,
           child: RevenueReportView(),
@@ -201,10 +195,8 @@ class HMSApp extends StatelessWidget {
           isAllowed: _canManageHotelConfig,
           child: CreateServiceView(),
         ),
-        '/add-room': (context) => const RoleGuard(
-          isAllowed: _canManageHotelConfig,
-          child: AddRoom(),
-        ),
+        '/add-room': (context) =>
+            const RoleGuard(isAllowed: _canManageHotelConfig, child: AddRoom()),
         '/penalty-fee-config': (context) => const RoleGuard(
           isAllowed: _canManageHotelConfig,
           child: PenaltyFeeConfig(),
@@ -341,6 +333,3 @@ class HMSApp extends StatelessWidget {
     );
   }
 }
-
-
-

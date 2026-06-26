@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/booking_details.dart';
 import 'package:hms_app/models/dtos/service_usage.dart';
-import 'package:hms_app/repositories/booking_repository.dart';
-import 'package:hms_app/repositories/service_repository.dart';
+import 'package:hms_app/services/booking_service.dart';
+import 'package:hms_app/services/service_catalog_service.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
@@ -20,8 +20,8 @@ class StayManagement extends StatefulWidget {
 
 class _StayManagementState extends State<StayManagement> {
   late Future<BookingDetails> _detailsFuture;
-  final _bookingRepository = BookingRepository();
-  final _serviceRepository = ServiceRepository();
+  final _bookingService = BookingService();
+  final _serviceCatalogService = ServiceCatalogService();
   DateTime? _checkoutDateTime;
   List<ServiceUsage>? _currentUsages;
   bool _isSaving = false;
@@ -29,7 +29,7 @@ class _StayManagementState extends State<StayManagement> {
   @override
   void initState() {
     super.initState();
-    _detailsFuture = _bookingRepository.getBookingDetailsWithServices(
+    _detailsFuture = _bookingService.getBookingDetailsWithServices(
       widget.bookingId,
     );
   }
@@ -64,12 +64,12 @@ class _StayManagementState extends State<StayManagement> {
   Future<void> _saveChanges(BookingDetails details) async {
     setState(() => _isSaving = true);
     try {
-      await _serviceRepository.updateServiceUsage(
+      await _serviceCatalogService.updateServiceUsage(
         widget.bookingId,
         _currentUsages!,
       );
 
-      await _bookingRepository.updateBooking(
+      await _bookingService.updateBooking(
         roomId: details.roomId,
         bookingId: widget.bookingId,
         checkInDateTime:

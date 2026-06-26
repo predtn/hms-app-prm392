@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/room_card_item.dart';
-import 'package:hms_app/repositories/room_repository.dart';
+import 'package:hms_app/services/room_service.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
 import 'package:hms_app/views/receptionist/widgets/room_card.dart';
@@ -25,7 +25,7 @@ class RoomMapView extends StatefulWidget {
 class _RoomMapViewState extends State<RoomMapView> {
   RoomFilter _selectedFilter = RoomFilter.all;
 
-  final _roomRepository = RoomRepository();
+  final _roomService = RoomService();
   List<RoomCardItem> _rooms = [];
   bool _isLoading = true;
 
@@ -45,10 +45,10 @@ class _RoomMapViewState extends State<RoomMapView> {
     });
     try {
       final rooms = switch (_selectedFilter) {
-        RoomFilter.all => await _roomRepository.getRoomMap(),
-        RoomFilter.empty => await _roomRepository.getAvailableRoomMap(),
-        RoomFilter.reserved => await _roomRepository.getReservedRoomMap(),
-        RoomFilter.occupied => await _roomRepository.getUsingRoomMap(),
+        RoomFilter.all => await _roomService.getRoomMap(),
+        RoomFilter.empty => await _roomService.getAvailableRoomMap(),
+        RoomFilter.reserved => await _roomService.getReservedRoomMap(),
+        RoomFilter.occupied => await _roomService.getUsingRoomMap(),
       };
       if (mounted) {
         setState(() {

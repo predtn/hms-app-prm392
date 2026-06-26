@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hms_app/models/user_profile.dart';
-import 'package:hms_app/repositories/user_repository.dart';
+import 'package:hms_app/services/user_service.dart';
 
 class UserProvider extends ChangeNotifier {
-  final UserRepository _repository = UserRepository();
+  final UserService _repository = UserService();
 
   UserProfile? _userProfile;
   bool _isLoading = false;

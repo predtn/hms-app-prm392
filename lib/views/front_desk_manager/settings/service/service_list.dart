@@ -1,6 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/service.dart';
-import 'package:hms_app/repositories/service_repository.dart';
+import 'package:hms_app/services/service_catalog_service.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 import 'package:hms_app/views/front_desk_manager/settings/service/create_service_view.dart';
@@ -13,7 +13,7 @@ class ServiceList extends StatefulWidget {
 }
 
 class _ServiceListState extends State<ServiceList> {
-  final _serviceRepo = ServiceRepository();
+  final _serviceCatalogService = ServiceCatalogService();
   List<Service> _services = [];
   bool _isLoading = true;
 
@@ -26,7 +26,7 @@ class _ServiceListState extends State<ServiceList> {
   Future<void> _loadServices() async {
     setState(() => _isLoading = true);
     try {
-      final services = await _serviceRepo.getServices();
+      final services = await _serviceCatalogService.getServices();
       setState(() {
         _services = services;
         _isLoading = false;
@@ -62,7 +62,7 @@ class _ServiceListState extends State<ServiceList> {
     if (confirm != true) return;
 
     try {
-      await _serviceRepo.deleteService(id);
+      await _serviceCatalogService.deleteService(id);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -223,5 +223,3 @@ class _ServiceListState extends State<ServiceList> {
     );
   }
 }
-
-

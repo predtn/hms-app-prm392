@@ -1,9 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/customer_short_detail.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
-import 'package:hms_app/repositories/booking_repository.dart';
-import 'package:hms_app/repositories/room_repository.dart';
-import 'package:hms_app/repositories/user_repository.dart';
+import 'package:hms_app/services/booking_service.dart';
+import 'package:hms_app/services/room_service.dart';
+import 'package:hms_app/services/user_service.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/date_diff.dart';
 import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
@@ -20,9 +20,9 @@ class CreateBookingScreen extends StatefulWidget {
 
 class _CreateBookingScreenState extends State<CreateBookingScreen> {
   late Future<RoomDetails> _roomDetailsFuture;
-  final _roomRepository = RoomRepository();
-  final _bookingRepository = BookingRepository();
-  final _userRepository = UserRepository();
+  final _roomService = RoomService();
+  final _bookingService = BookingService();
+  final _userService = UserService();
 
   final _guestNameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -37,8 +37,8 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
   @override
   void initState() {
     super.initState();
-    _roomDetailsFuture = _roomRepository.getRoomDetails(widget.roomId);
-    _customersFuture = _userRepository.getAllCustomers();
+    _roomDetailsFuture = _roomService.getRoomDetails(widget.roomId);
+    _customersFuture = _userService.getAllCustomers();
   }
 
   @override
@@ -121,12 +121,12 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
     try {
       final String userId;
       if (_isNewCustomer) {
-        userId = await _userRepository.getNewlyCreatedCustomerId(name, phone);
+        userId = await _userService.getNewlyCreatedCustomerId(name, phone);
       } else {
         userId = _selectedCustomer!.userId;
       }
 
-      await _bookingRepository.createBooking(
+      await _bookingService.createBooking(
         roomId: widget.roomId,
         userId: userId,
         checkInDateTime: _checkIn!,
@@ -399,5 +399,3 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
     );
   }
 }
-
-

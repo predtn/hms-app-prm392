@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/file_upload.dart';
-import 'package:hms_app/repositories/room_type_repository.dart';
+import 'package:hms_app/services/room_type_service.dart';
 import 'package:hms_app/models/room_type.dart';
 
 class CreateRoomTypeView extends StatefulWidget {
@@ -18,7 +18,7 @@ class CreateRoomTypeView extends StatefulWidget {
 
 class _CreateRoomTypeViewState extends State<CreateRoomTypeView> {
   final _formKey = GlobalKey<FormState>();
-  final _roomTypeRepository = RoomTypeRepository();
+  final _roomTypeService = RoomTypeService();
 
   bool _isSaving = false;
 
@@ -92,7 +92,7 @@ class _CreateRoomTypeViewState extends State<CreateRoomTypeView> {
       String? finalImageUrl = uploadedImageUrl ?? widget.roomType?.imageUrl;
 
       if (widget.roomType == null) {
-        await _roomTypeRepository.createRoomType(
+        await _roomTypeService.createRoomType(
           typeName: _typeNameController.text.trim(),
           numberOfBed: int.parse(_bedController.text.trim()),
           pricePerNight: int.parse(_priceController.text.trim()),
@@ -105,7 +105,7 @@ class _CreateRoomTypeViewState extends State<CreateRoomTypeView> {
           imageUrl: finalImageUrl,
         );
       } else {
-        await _roomTypeRepository.updateRoomType(
+        await _roomTypeService.updateRoomType(
           id: widget.roomType!.id,
           typeName: _typeNameController.text.trim(),
           numberOfBed: int.parse(_bedController.text.trim()),

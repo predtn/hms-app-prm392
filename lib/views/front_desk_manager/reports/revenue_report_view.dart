@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:hms_app/models/dtos/revenue_report.dart';
-import 'package:hms_app/repositories/report_repository.dart';
+import 'package:hms_app/services/report_service.dart';
 import 'package:hms_app/utils/format_vnd.dart';
 
 class RevenueReportView extends StatefulWidget {
@@ -12,7 +12,7 @@ class RevenueReportView extends StatefulWidget {
 }
 
 class _RevenueReportViewState extends State<RevenueReportView> {
-  final _reportRepository = ReportRepository();
+  final _reportService = ReportService();
   late DateTime _fromDate;
   late DateTime _toDate;
   _RevenueChartRange _chartRange = _RevenueChartRange.oneMonth;
@@ -23,14 +23,12 @@ class _RevenueReportViewState extends State<RevenueReportView> {
     super.initState();
     final now = DateTime.now();
     _toDate = DateTime(now.year, now.month, now.day);
-    _fromDate = _toDate.subtract(
-      Duration(days: _chartRange.days! - 1),
-    );
+    _fromDate = _toDate.subtract(Duration(days: _chartRange.days! - 1));
     _reportFuture = _loadReport();
   }
 
   Future<RevenueReport> _loadReport() {
-    return _reportRepository.getRevenueReport(
+    return _reportService.getRevenueReport(
       fromDate: _fromDate,
       toDate: _toDate,
     );
@@ -241,8 +239,8 @@ class _RevenueTrendCard extends StatelessWidget {
                   child: Text(
                     'Xu hướng doanh thu',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Icon(
@@ -269,10 +267,7 @@ class _RevenueTrendCard extends StatelessWidget {
                 ),
               )
             else
-              _RevenueLineChart(
-                points: points,
-                maxRevenue: maxRevenue,
-              ),
+              _RevenueLineChart(points: points, maxRevenue: maxRevenue),
           ],
         ),
       ),
@@ -299,8 +294,8 @@ class _RevenueRangeSelector extends StatelessWidget {
         Text(
           'Khoảng hiển thị',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         for (final range in _RevenueChartRange.values)
           ChoiceChip(
@@ -322,10 +317,7 @@ class _RevenueLineChart extends StatelessWidget {
   final List<RevenueDailyPoint> points;
   final int maxRevenue;
 
-  const _RevenueLineChart({
-    required this.points,
-    required this.maxRevenue,
-  });
+  const _RevenueLineChart({required this.points, required this.maxRevenue});
 
   List<FlSpot> get _spots {
     if (points.length == 1) {
@@ -392,10 +384,8 @@ class _RevenueLineChart extends StatelessWidget {
                 drawVerticalLine: true,
                 horizontalInterval: maxY / 4,
                 verticalInterval: points.length <= 7 ? 1 : points.length / 6,
-                getDrawingHorizontalLine: (_) => FlLine(
-                  color: gridColor,
-                  strokeWidth: 1,
-                ),
+                getDrawingHorizontalLine: (_) =>
+                    FlLine(color: gridColor, strokeWidth: 1),
                 getDrawingVerticalLine: (_) => FlLine(
                   color: gridColor.withValues(alpha: 0.32),
                   strokeWidth: 1,
@@ -419,10 +409,7 @@ class _RevenueLineChart extends StatelessWidget {
                     interval: maxY / 4,
                     getTitlesWidget: (value, meta) => Text(
                       _formatAxisRevenue(value),
-                      style: TextStyle(
-                        color: mutedTextColor,
-                        fontSize: 10,
-                      ),
+                      style: TextStyle(color: mutedTextColor, fontSize: 10),
                     ),
                   ),
                 ),
@@ -447,10 +434,7 @@ class _RevenueLineChart extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
                           _formatShortDate(points[index].date),
-                          style: TextStyle(
-                            color: mutedTextColor,
-                            fontSize: 10,
-                          ),
+                          style: TextStyle(color: mutedTextColor, fontSize: 10),
                         ),
                       );
                     },
@@ -555,10 +539,7 @@ class _RevenueChartLegendDot extends StatelessWidget {
   final Color color;
   final String label;
 
-  const _RevenueChartLegendDot({
-    required this.color,
-    required this.label,
-  });
+  const _RevenueChartLegendDot({required this.color, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -573,10 +554,7 @@ class _RevenueChartLegendDot extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 5),
-        Text(
-          label,
-          style: TextStyle(color: textColor, fontSize: 11),
-        ),
+        Text(label, style: TextStyle(color: textColor, fontSize: 11)),
       ],
     );
   }
@@ -684,8 +662,9 @@ class _MetricCard extends StatelessWidget {
                       maxLines: 1,
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color:
-                            prominent ? colorScheme.onPrimaryContainer : null,
+                        color: prominent
+                            ? colorScheme.onPrimaryContainer
+                            : null,
                       ),
                     ),
                   ),

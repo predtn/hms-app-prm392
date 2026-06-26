@@ -37,7 +37,8 @@ class _LoginViewState extends State<LoginView> {
 
       // 3. Since there was another async gap (await), we need one more check!
       if (!mounted) return;
-      final defaultRoute = userProvider.userProfile?.role.defaultRoute ?? '/profile';
+      final defaultRoute =
+          userProvider.userProfile?.role.defaultRoute ?? '/profile';
       Navigator.of(context).pushReplacementNamed(defaultRoute);
     } catch (e) {
       if (mounted) {

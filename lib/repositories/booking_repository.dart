@@ -6,56 +6,23 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class BookingRepository {
   final _supabase = Supabase.instance.client;
 
-  Future<void> createBooking({
+  Future<void> insertBooking({
     required int roomId,
     required String userId,
-    required DateTime checkInDateTime,
+    required DateTime scheduledCheckInDateTime,
     required DateTime checkOutDateTime,
-    required bool checkInNow,
+    required DateTime? actualCheckInDateTime,
+    required BookingStatus status,
   }) async {
-    // Validate booking
-    if (!await _isBookingOverlap(
-      roomId: roomId,
-      checkInDateTime: checkInDateTime,
-      checkOutDateTime: checkOutDateTime,
-    )) {
-      throw Exception('Phòng đã được đặt trong thời gian này!');
-    }
-
-    if (checkInNow && await _isRoomUsingNow(roomId: roomId)) {
-      throw Exception('Phòng chưa được checkout!');
-    }
-
-    // Step 1: Find or create user
-    var userProfile = await _supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('id', userId)
-        .maybeSingle();
-
-    if (userProfile == null) {
-      throw Exception('Số điện thoại này chưa được đăng ký');
-    }
-
-    // Step 2: Create booking
-    final checkInDate = DateTime(
-      checkInDateTime.year,
-      checkInDateTime.month,
-      checkInDateTime.day,
-      14,
-      0,
-    );
     await _supabase.from('bookings').insert({
       'room_id': roomId,
       'user_id': userId,
-      'check_in_date_time': checkInDate.toUtc().toIso8601String(),
-      'actual_check_in_date_time': checkInNow
-          ? checkInDateTime.toUtc().toIso8601String()
-          : null,
+      'check_in_date_time': scheduledCheckInDateTime.toUtc().toIso8601String(),
+      'actual_check_in_date_time': actualCheckInDateTime
+          ?.toUtc()
+          .toIso8601String(),
       'check_out_date_time': checkOutDateTime.toUtc().toIso8601String(),
-      'status': checkInNow
-          ? BookingStatus.checkedIn.toDatabaseValue()
-          : BookingStatus.confirmed.toDatabaseValue(),
+      'status': status.toDatabaseValue(),
     });
   }
 
@@ -219,10 +186,7 @@ class BookingRepository {
     await _supabase.from('bookings').delete().eq('id', bookingId);
   }
 
-  Future<void> checkIn(int bookingId, int roomId) async {
-    if (await _isRoomUsingNow(roomId: roomId)) {
-      throw Exception('Phòng chưa được checkout!');
-    }
+  Future<void> checkIn(int bookingId) async {
     await _supabase
         .from('bookings')
         .update({
@@ -232,20 +196,10 @@ class BookingRepository {
         .eq('id', bookingId);
   }
 
-  Future<void> updateBooking({
-    required int roomId,
+  Future<void> updateBookingCheckOutDate({
     required int bookingId,
-    required DateTime checkInDateTime,
     required DateTime checkOutDateTime,
   }) async {
-    if (!await _isBookingOverlap(
-      roomId: roomId,
-      checkInDateTime: checkInDateTime,
-      checkOutDateTime: checkOutDateTime,
-      bookingId: bookingId,
-    )) {
-      throw Exception("Phòng đã được đặt trong thời gian này!");
-    }
     await _supabase
         .from("bookings")
         .update({
@@ -273,19 +227,12 @@ class BookingRepository {
         .eq('id', bookingId);
   }
 
-  /// --------------------------------------------------------------------
-  /// Helper functions check room is ok to book in this time
-
-  Future<bool> _isBookingOverlap({
+  Future<List<Map<String, dynamic>>> getPotentialOverlappingBookings({
     required int roomId,
-    required DateTime checkInDateTime,
-    required DateTime checkOutDateTime,
+    required DateTime checkInUtc,
+    required DateTime checkOutUtc,
     int? bookingId,
   }) async {
-    // Ensure we always send UTC to Postgres, regardless of local timezone
-    final checkInUtc = checkInDateTime.toUtc();
-    final checkOutUtc = checkOutDateTime.toUtc();
-
     var query = _supabase
         .from('bookings')
         .select()
@@ -302,28 +249,23 @@ class BookingRepository {
 
     final response = await query;
 
-    final overlapping = (response as List).where((booking) {
-      final actualCheckOut = booking['actual_check_out_date_time'];
-      final scheduledCheckOut = booking['check_out_date_time'] as String;
-
-      final effectiveCheckOut = actualCheckOut ?? scheduledCheckOut;
-
-      // Parse and convert to UTC for safe comparison
-      final effectiveCheckOutDate = DateTime.parse(effectiveCheckOut).toUtc();
-
-      return effectiveCheckOutDate.isAfter(checkInUtc);
-    }).toList();
-
-    return overlapping.isEmpty;
+    return (response as List)
+        .map((row) => Map<String, dynamic>.from(row as Map))
+        .toList();
   }
 
-  Future<bool> _isRoomUsingNow({required int roomId}) async {
+  Future<List<Map<String, dynamic>>> getActiveCheckedInBookingsForRoom({
+    required int roomId,
+  }) async {
     final response = await _supabase
         .from('bookings')
         .select()
         .eq('room_id', roomId)
         .eq('status', 'checked_in')
         .isFilter('actual_check_out_date_time', null);
-    return (response as List).isNotEmpty;
+
+    return (response as List)
+        .map((row) => Map<String, dynamic>.from(row as Map))
+        .toList();
   }
 }

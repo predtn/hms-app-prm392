@@ -276,10 +276,7 @@ class ReceptionTaskCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            _InfoRow(
-              icon: Icons.phone_outlined,
-              text: booking.customerPhone,
-            ),
+            _InfoRow(icon: Icons.phone_outlined, text: booking.customerPhone),
             const SizedBox(height: 6),
             _InfoRow(icon: Icons.schedule_outlined, text: timeText),
             const SizedBox(height: 14),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/room_search_result.dart';
 import 'package:hms_app/models/dtos/room_type_option.dart';
-import 'package:hms_app/repositories/room_type_repository.dart';
+import 'package:hms_app/services/room_type_service.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/widgets/app_drawer.dart';
-import 'package:hms_app/repositories/room_repository.dart';
+import 'package:hms_app/services/room_service.dart';
 import 'package:hms_app/views/receptionist/booking_many_view.dart';
 import 'package:hms_app/views/receptionist/widgets/date_time_picker.dart';
 
@@ -16,8 +16,8 @@ class FindRoomView extends StatefulWidget {
 }
 
 class _FindRoomViewState extends State<FindRoomView> {
-  final RoomRepository _roomRepository = RoomRepository();
-  final RoomTypeRepository _roomTypeRepository = RoomTypeRepository();
+  final RoomService _roomService = RoomService();
+  final RoomTypeService _roomTypeService = RoomTypeService();
   List<RoomSearchResult> _filteredRooms = [];
   List<RoomTypeOption> _roomTypes = [];
   bool _isLoading = false;
@@ -42,7 +42,7 @@ class _FindRoomViewState extends State<FindRoomView> {
 
   Future<void> _loadRoomTypes() async {
     try {
-      final types = await _roomTypeRepository.getRoomTypeOptions();
+      final types = await _roomTypeService.getRoomTypeOptions();
       setState(() => _roomTypes = types);
     } catch (e) {
       debugPrint('Error loading room types: $e');
@@ -116,7 +116,7 @@ class _FindRoomViewState extends State<FindRoomView> {
                 .map((t) => t.typeName)
                 .toList();
 
-      final rooms = await _roomRepository.searchRooms(
+      final rooms = await _roomService.searchRooms(
         numberOfBed: bedNumber,
         typeNames: selectedTypeNames,
         checkInDate: checkInDate,
@@ -206,9 +206,7 @@ class _FindRoomViewState extends State<FindRoomView> {
               decoration: BoxDecoration(
                 color: color.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: color.outlineVariant.withAlpha(120),
-                ),
+                border: Border.all(color: color.outlineVariant.withAlpha(120)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,10 +399,7 @@ class _RoomTypeGroup extends StatelessWidget {
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: color.outlineVariant.withAlpha(120),
-          width: 1,
-        ),
+        side: BorderSide(color: color.outlineVariant.withAlpha(120), width: 1),
       ),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(

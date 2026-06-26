@@ -1,9 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hms_app/models/dtos/customer_short_detail.dart';
 import 'package:hms_app/models/dtos/room_details.dart';
-import 'package:hms_app/repositories/booking_repository.dart';
-import 'package:hms_app/repositories/room_repository.dart';
-import 'package:hms_app/repositories/user_repository.dart';
+import 'package:hms_app/services/booking_service.dart';
+import 'package:hms_app/services/room_service.dart';
+import 'package:hms_app/services/user_service.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 import 'package:hms_app/utils/date_diff.dart';
 import 'package:hms_app/utils/format_vnd.dart';
@@ -28,9 +28,9 @@ class CreateBookingManyScreen extends StatefulWidget {
 
 class _CreateBookingManyScreenState extends State<CreateBookingManyScreen> {
   late Future<List<RoomDetails>> _roomDetailsFuture;
-  final _roomRepository = RoomRepository();
-  final _bookingRepository = BookingRepository();
-  final _userRepository = UserRepository();
+  final _roomService = RoomService();
+  final _bookingService = BookingService();
+  final _userService = UserService();
 
   final _guestNameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -48,9 +48,9 @@ class _CreateBookingManyScreenState extends State<CreateBookingManyScreen> {
     _checkIn = widget.checkIn;
     _checkOut = widget.checkOut;
     _roomDetailsFuture = Future.wait(
-      widget.roomIds.map((id) => _roomRepository.getRoomDetails(id)),
+      widget.roomIds.map((id) => _roomService.getRoomDetails(id)),
     );
-    _customersFuture = _userRepository.getAllCustomers();
+    _customersFuture = _userService.getAllCustomers();
   }
 
   @override
@@ -133,21 +133,18 @@ class _CreateBookingManyScreenState extends State<CreateBookingManyScreen> {
     try {
       final String userId;
       if (_isNewCustomer) {
-        userId = await _userRepository.getNewlyCreatedCustomerId(name, phone);
+        userId = await _userService.getNewlyCreatedCustomerId(name, phone);
       } else {
         userId = _selectedCustomer!.userId;
       }
 
-      // Create a booking for each selected room
-      for (final roomId in widget.roomIds) {
-        await _bookingRepository.createBooking(
-          roomId: roomId,
-          userId: userId,
-          checkInDateTime: _checkIn!,
-          checkOutDateTime: _checkOut!,
-          checkInNow: _checkInNow,
-        );
-      }
+      await _bookingService.createBookings(
+        roomIds: widget.roomIds,
+        userId: userId,
+        checkInDateTime: _checkIn!,
+        checkOutDateTime: _checkOut!,
+        checkInNow: _checkInNow,
+      );
       if (mounted) {
         final customer = CustomerShortDetail(
           userId: userId,
@@ -155,10 +152,9 @@ class _CreateBookingManyScreenState extends State<CreateBookingManyScreen> {
           phone: phone,
         );
         Navigator.of(context).pushReplacementNamed('/find-customer');
-        Navigator.of(context).pushNamed(
-          '/customer-bookings/$userId',
-          arguments: customer,
-        );
+        Navigator.of(
+          context,
+        ).pushNamed('/customer-bookings/$userId', arguments: customer);
       }
     } catch (e) {
       if (mounted) {
@@ -526,5 +522,3 @@ class _CreateBookingManyScreenState extends State<CreateBookingManyScreen> {
     );
   }
 }
-
-

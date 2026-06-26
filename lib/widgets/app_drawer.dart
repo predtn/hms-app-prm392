@@ -81,7 +81,10 @@ class AppDrawer extends StatelessWidget {
 
   int _getCurrentIndex(BuildContext context) {
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '';
-    final profile = Provider.of<UserProvider>(context, listen: false).userProfile;
+    final profile = Provider.of<UserProvider>(
+      context,
+      listen: false,
+    ).userProfile;
     final destinations = _getDestinationsForRole(profile?.role);
     final index = destinations.indexWhere((d) => d.route == currentRoute);
     return index == -1 ? 0 : index;
@@ -101,7 +104,10 @@ class AppDrawer extends StatelessWidget {
   }
 
   void _handleDestinationSelected(BuildContext context, int index) {
-    final profile = Provider.of<UserProvider>(context, listen: false).userProfile;
+    final profile = Provider.of<UserProvider>(
+      context,
+      listen: false,
+    ).userProfile;
     final destinations = _getDestinationsForRole(profile?.role);
 
     if (index == destinations.length) {

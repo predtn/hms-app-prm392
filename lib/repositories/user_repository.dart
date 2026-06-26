@@ -38,6 +38,16 @@ class UserRepository {
         .eq('id', id);
   }
 
+  Future<bool> userExists(String id) async {
+    final data = await _supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle();
+
+    return data != null;
+  }
+
   Future<List<CustomerShortDetail>> getAllCustomers() async {
     final data = await _supabase
         .from('user_profiles')

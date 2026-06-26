@@ -4,8 +4,5 @@ class ReceptionTaskData {
   final List<BookingScheduleItem> checkins;
   final List<BookingScheduleItem> checkouts;
 
-  const ReceptionTaskData({
-    required this.checkins,
-    required this.checkouts,
-  });
+  const ReceptionTaskData({required this.checkins, required this.checkouts});
 }

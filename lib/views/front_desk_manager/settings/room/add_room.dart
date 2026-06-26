@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hms_app/models/room.dart';
-import 'package:hms_app/repositories/room_repository.dart';
-import 'package:hms_app/repositories/room_type_repository.dart';
+import 'package:hms_app/services/room_service.dart';
+import 'package:hms_app/services/room_type_service.dart';
 import 'package:hms_app/models/dtos/room_type_option.dart';
 import 'package:hms_app/utils/app_dialogs.dart';
 
@@ -16,8 +16,8 @@ class AddRoom extends StatefulWidget {
 
 class _AddRoomState extends State<AddRoom> {
   final _formKey = GlobalKey<FormState>();
-  final _roomRepository = RoomRepository();
-  final _roomTypeRepository = RoomTypeRepository();
+  final _roomService = RoomService();
+  final _roomTypeService = RoomTypeService();
 
   final _floorController = TextEditingController();
   final _roomNameController = TextEditingController();
@@ -43,13 +43,13 @@ class _AddRoomState extends State<AddRoom> {
 
   Future<void> _loadData() async {
     try {
-      final options = await _roomTypeRepository.getRoomTypeOptions();
+      final options = await _roomTypeService.getRoomTypeOptions();
       setState(() {
         _roomTypeOptions = options;
       });
 
       if (isEditing) {
-        final room = await _roomRepository.getRoomById(widget.roomId!);
+        final room = await _roomService.getRoomById(widget.roomId!);
         _roomNameController.text = room.roomName;
         _floorController.text = room.floor.toString();
 
@@ -90,7 +90,7 @@ class _AddRoomState extends State<AddRoom> {
           roomTypeId: _selectedRoomType!.id,
           floor: int.parse(_floorController.text.trim()),
         );
-        await _roomRepository.updateRoom(updatedRoom);
+        await _roomService.updateRoom(updatedRoom);
       } else {
         final newRoom = Room(
           id: 0, // Ignored by the database usually or omit for insert
@@ -98,7 +98,7 @@ class _AddRoomState extends State<AddRoom> {
           roomTypeId: _selectedRoomType!.id,
           floor: int.parse(_floorController.text.trim()),
         );
-        await _roomRepository.createRoom(newRoom);
+        await _roomService.createRoom(newRoom);
       }
 
       if (mounted) {
