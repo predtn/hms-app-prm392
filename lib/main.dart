@@ -108,17 +108,25 @@ class AccessDeniedView extends StatelessWidget {
 }
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   await Supabase.initialize(
     url: 'https://tgrjqdfzpkbhlncomcah.supabase.co',
     anonKey: 'sb_publishable_blxE4BiCmUVHm90drunqHg_WinyBHyM',
   );
+
+  final themeProvider = ThemeProvider();
+  final colorProvider = ColorProvider();
+
+  await Future.wait([themeProvider.loadTheme(), colorProvider.loadColor()]);
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => BookingDraftProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => ColorProvider()),
+        ChangeNotifierProvider.value(value: themeProvider),
+        ChangeNotifierProvider.value(value: colorProvider),
         ChangeNotifierProvider(create: (_) => PricingConfigProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
         ChangeNotifierProvider(create: (_) => RoomProvider()),
